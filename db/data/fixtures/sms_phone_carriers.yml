@@ -1,0 +1,65 @@
+carrier_1:
+  id: "1"
+  name: Verizon
+  email_domain: "vtext.com"
+
+carrier_2:
+  id: "2"
+  name: Alltel
+  email_domain: "message.alltel.com"
+
+carrier_3:
+  id: "3"
+  name: mmode
+  email_domain: "mmode.com"
+
+carrier_4:
+  id: "4"
+  name: Cellular One
+  email_domain: "mobile.celloneusa.com"
+
+carrier_5:
+  id: "5"
+  name: AT&T (Cingular)
+  email_domain: "txt.att.net"
+
+carrier_6:
+  id: "6"
+  name: Nextel
+  email_domain: "page.nextel.com"
+
+carrier_7:
+  id: "7"
+  name: OmnipointPCS
+  email_domain: "omnipointpcs.com"
+
+carrier_8:
+  id: "8"
+  name: Qwest
+  email_domain: "qwestmp.com"
+
+carrier_9:
+  id: "9"
+  name: Sprint
+  email_domain: "messaging.sprintpcs.com"
+
+carrier_10:
+  id: "10"
+  name: T-Mobile
+  email_domain: "tmomail.net"
+
+carrier_11:
+  id: "11"
+  name: Virgin Mobile
+  email_domain: "vmobl.com"
+
+carrier_12:
+  id: "12"
+  name: US Cellular
+  email_domain: "email.uscc.com"
+
+carrier_13:
+  id: "13"
+  name: Amp'd
+  email_domain: "ampdpix.com"
+
