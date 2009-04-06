@@ -1,0 +1,30 @@
+<h1>Listing drafts</h1>
+
+<table>
+  <tr>
+    <th>Message</th>
+    <th>Header</th>
+    <th>Footer</th>
+    <th>Status</th>
+    <th>Deliver after</th>
+    <th>Delivery date</th>
+  </tr>
+
+<% @drafts.each do |draft| %>
+  <tr>
+    <td><%=h draft.message %></td>
+    <td><%=h draft.header %></td>
+    <td><%=h draft.footer %></td>
+    <td><%=h draft.status %></td>
+    <td><%=h draft.deliver_after %></td>
+    <td><%=h draft.delivery_date %></td>
+    <td><%= link_to 'Show', sms_draft_path(:id => draft)%></td>
+    <td><%= link_to 'Edit', edit_sms_draft_path(draft) %></td>
+    <td><%= link_to 'Destroy', sms_draft_path(draft), :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New draft', new_sms_draft_path %>

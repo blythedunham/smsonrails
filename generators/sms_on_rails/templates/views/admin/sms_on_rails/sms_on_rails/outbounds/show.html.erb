@@ -1,0 +1,58 @@
+<p>
+  <b>Status:</b>
+  <%=h @outbound.status %>
+</p>
+
+<p>
+  <b>Notes:</b>
+  <%=h @outbound.notes %>
+</p>
+
+<p>
+  <b>Procesed on:</b>
+  <%=h @outbound.processed_on %>
+</p>
+
+<p>
+  <b>Sms service provider:</b>
+  <%=h @outbound.sms_service_provider.human_name if @outbound.sms_service_provider %>
+</p>
+
+<p>
+  <b>Created at:</b>
+  <%=h @outbound.created_at %>
+</p>
+
+<p>
+  <b>Retry count:</b>
+  <%=h @outbound.retry_count %>
+</p>
+
+<p>
+  <b>Sub status:</b>
+  <%=h @outbound.sub_status %>
+</p>
+
+<p>
+  <b>Options:</b>
+  <%=h @outbound.options %>
+</p>
+
+<p>
+  <b>Send priority:</b>
+  <%=h @outbound.send_priority %>
+</p>
+
+<p>
+  <b>Draft:</b>
+  <%= link_to_sms_draft(@outbound.draft)  %>
+</p>
+
+<p>
+  <b>Phone number:</b>
+  <%= link_to_sms_phone_number(@outbound.phone_number) %>
+</p>
+
+
+<%= link_to 'Edit', edit_sms_outbound_path(@outbound) %> |
+<%= link_to 'Back', sms_outbounds_path %>

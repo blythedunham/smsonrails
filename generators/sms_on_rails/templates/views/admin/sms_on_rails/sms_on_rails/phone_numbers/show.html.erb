@@ -1,0 +1,27 @@
+<p>
+  <b>Number:</b>
+  <%=h @phone_number.human_display %>
+</p>
+
+<p>
+  <b>Carrier:</b>
+  <%=h @phone_number.carrier_id %>
+</p>
+
+<p>
+  <b>Country code:</b>
+  <%=h @phone_number.country_code %>
+</p>
+
+<p>
+  <b>Do Not Send:</b>
+  <%=h @phone_number.do_not_send %>
+</p>
+
+<p>
+  <b>White List:</b>
+  <%=h @phone_number.white_list %>
+</p>
+
+<%= link_to 'Edit', edit_sms_phone_number_path(@phone_number) %> |
+<%= link_to 'Back', sms_phone_numbers_path %>

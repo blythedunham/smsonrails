@@ -1,3 +1,17 @@
+# This is the base class for service providers from which all others inherit
+# All service providers are singletons and can be accessed by their instance
+#
+# To send a message without validation
+#  SmsOnRails::ServiceProviders::<Provider>.instance.send_message '12065551234', 'my message', options
+#
+# To send a message with validation use send_to_phone_number with a string or SmsOnRails::PhoneNumber instance
+#  SmsOnRails::ServiceProviders<Provider>.instance.send_to_phone_number(number, message, options)
+#
+# To send an sms(with validation)
+#  SmsOnRails::ServiceProviders<Provider>.instance.send_sms(sms, options)
+# However, it is preferred to use the locking mechanism to prevent double messages from being sent
+#   sms.deliver!
+#
 module SmsOnRails
   module ServiceProviders
     class Base 
@@ -21,6 +35,7 @@ module SmsOnRails
       cattr_accessor :logger
       @@logger ||= ActiveRecord::Base.logger
 
+      # Deliver all the sms messages marked with this as its sms service provider
       def deliver
         Outbound.deliver(delivery_options.merge(:conditions => ['sms_service_provider_id = ?', self.provider_id]))
       end

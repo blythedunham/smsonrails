@@ -1,0 +1,35 @@
+<h1>New draft</h1>
+
+<% form_for(@draft) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :message %><br />
+    <%= f.text_field :message %>
+  </p>
+  <p>
+    <%= f.label :header %><br />
+    <%= f.text_field :header %>
+  </p>
+  <p>
+    <%= f.label :footer %><br />
+    <%= f.text_field :footer %>
+  </p>
+  <p>
+    <%= f.label :status %><br />
+    <%= f.text_field :status %>
+  </p>
+  <p>
+    <%= f.label :deliver_after %><br />
+    <%= f.datetime_select :deliver_after %>
+  </p>
+  <p>
+    <%= f.label :delivery_date %><br />
+    <%= f.datetime_select :delivery_date %>
+  </p>
+  <p>
+    <%= f.submit 'Create' %>
+  </p>
+<% end %>
+
+<%= link_to 'Back',sms_drafts_path %>

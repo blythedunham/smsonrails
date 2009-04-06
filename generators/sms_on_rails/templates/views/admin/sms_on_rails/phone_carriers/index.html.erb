@@ -1,0 +1,24 @@
+<h1>Listing phone_carriers</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Email domain</th>
+    <th>Options</th>
+  </tr>
+
+<% @phone_carriers.each do |phone_carrier| %>
+  <tr>
+    <td><%=h phone_carrier.name %></td>
+    <td><%=h phone_carrier.email_domain %></td>
+    <td><%=h phone_carrier.options %></td>
+    <td><%= link_to 'Show', sms_phone_carrier_path(phone_carrier) %></td>
+    <td><%= link_to 'Edit', edit_sms_phone_carrier_path(phone_carrier) %></td>
+    <td><%= link_to 'Destroy', sms_phone_carrier_path(phone_carrier), :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New phone_carrier', new_sms_phone_carrier_path %>

@@ -1,0 +1,18 @@
+<p>
+  <b>Name:</b>
+  <%=h @phone_carrier.name %>
+</p>
+
+<p>
+  <b>Email domain:</b>
+  <%=h @phone_carrier.email_domain %>
+</p>
+
+<p>
+  <b>Options:</b>
+  <%=h @phone_carrier.options %>
+</p>
+
+
+<%= link_to 'Edit', edit_sms_phone_carrier_path(@phone_carrier) %> |
+<%= link_to 'Back', sms_phone_carriers_path %>

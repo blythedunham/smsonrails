@@ -1,0 +1,27 @@
+Description:
+    Setup Sms On Rails
+
+    The following actions can be specified seperately or together
+
+    environment (default)
+      - add the configuration to config/environment.rb
+    models
+      - copy the vanilla models up to app/models/sms_on_rails so they can be
+        edited. By default the models in vendor/plugins/sms_on_rails/lib/models are used
+    views
+      - create admin sms views and setup restful routes
+    dependencies
+      - install dependent plugins and gems (enviroment does this automatically)
+  
+Example:
+  Set up the environment and create models in app/models/sms_on_rails
+    ./script/generate sms_on_rails setup environment models
+
+  Just setup the environment
+    ./script/generate sms_on_rails setup
+
+  Setup the views
+    ./script/generate sms_on_rails setup views
+
+
+

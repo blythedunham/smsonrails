@@ -11,6 +11,6 @@ fixture_class_names = {
 fixture_path = File.dirname(__FILE__) + '/data/fixtures'
 
 fixture_files = Dir.glob(fixture_path + '/*.yml').collect{|f| File.basename(f, '.yml')}
-fixture_class_names.values.each {|klass| puts klass; klass.constantize.delete_all }
+fixture_class_names.values.each {|klass| klass.constantize.delete_all }
 
 Fixtures.create_fixtures(fixture_path, fixture_files, fixture_class_names)
