@@ -5,4 +5,3 @@
     end
 
     add_index :sms_phone_carriers, :name, :unique => 'true', :name => 'uk_phone_carriers_name'
-

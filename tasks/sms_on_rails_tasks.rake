@@ -1,4 +1,5 @@
 
+require File.dirname(__FILE__) + '/../lib/sms_on_rails/schema_helper'
 
 namespace :sms do
   desc 'Reset the Sms data'
@@ -7,15 +8,25 @@ namespace :sms do
   desc 'Create Tables and seed them'
   task :setup => [ :create_tables, :seed_tables ]
 
-  desc 'Remove all sms data'
-  task :teardown => :drop_tables
+  desc 'Teardown'
+  task :teardown => [:drop_tables]
+  schema_tables = %w(email_gateway_carrier_table model_tables)
 
-  desc 'Create Sms database tables'
-  task :create_tables => :environment do
-    raise "Task unavailable to this database (no migration support)" unless ActiveRecord::Base.connection.supports_migrations?
-    load File.dirname(__FILE__) + '/../db/schema.rb'
+  [:create, :drop].each do |command|
+    schema_tables.each do |table|
+    
+      desc "#{command.to_s.titleize} #{table.titleize}"
+      task "#{command}_#{table}".to_sym => :environment do
+        str = SmsOnRails::SchemaHelper.schema(command, table, :safe => true)
+        puts str
+        eval str
+      end
+    end
+    desc '#{command.to_s.titleize} All SMS database tables'
+    task "#{command}_tables".to_sym => schema_tables.collect{|t| "sms:#{command}_#{t}"}
   end
 
+  
   desc 'Seed tables'
   task :seed_tables => :environment do
     puts "Seeding SMS tables..."

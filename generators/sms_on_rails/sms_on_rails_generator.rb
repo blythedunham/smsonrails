@@ -1,6 +1,9 @@
 require 'rails_generator/generators/applications/app/template_runner'
 
 class SmsOnRailsGenerator < Rails::Generator::NamedBase
+
+  default_options  :models_only => false, :carriers_only => false, :skip_migration => false
+
   def manifest
     @actions = (actions.blank?) ? %w(environment migration) : self.actions
     @actions.sort! #we want environment to run first
@@ -26,6 +29,18 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
 
   def banner
     "Usage: #{$0} sms_on_rails setup [models views environment]"
+  end
+
+
+  def add_options!(opt)
+    opt.separator ''
+    opt.separator 'Options:'
+    opt.on("-m", "--models-only",
+           "Skip the model migration and only migrate phone carriers",
+           "Default: false") { |v| options[:models_only] = v }
+    opt.on("-c", "--carriers-only",
+           "Skip the phone carriers and only migrate the models",
+           "Default: false") { |v| options[:carriers_only] = v }
   end
 
   def create_views(m)
@@ -115,6 +130,7 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
     logger.quiet = options[:quiet]
   end
 
+  #generate the migration template
   def generate_migration_template(m)
     unless options[:skip_migration]
       m.migration_template 'migration.rb', 'db/migrate', :assigns => {
@@ -134,8 +150,9 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
     unless @migration_files
       @migration_files = []
       @migration_files << 'email_gateway_carrier_table' unless options[:models_only]
-      @migration_files << 'model_tables' unless options[:carrier_only]
+      @migration_files << 'model_tables' unless options[:carriers_only]
     end
+    @migration_files
   end
 
 

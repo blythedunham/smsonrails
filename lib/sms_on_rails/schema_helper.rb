@@ -29,7 +29,7 @@ module SmsOnRails
         data = file_to_string(file)
         data.scan(/create_table\s+[":]([^\W]*)/) do
           table_name = $1.dup
-          str << safe_code(str, options) { |code| code << "  drop_table :#{table_name}\n" }
+          str << safe_code(str, options) { |code| code << "    drop_table :#{table_name}\n" }
         end
         str
       end

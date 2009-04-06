@@ -16,21 +16,24 @@ Coming soon very rough admin controller stubs.
 
 Version -1.0.0 Very much under development
 
+
 Setup
 =======
-1. Install Plugin and Dependencies
-script/plugin git://github.com/blythedunham/smsonrails.git
-script/plugin git://github.com/blythedunham/static_record_cache.git
-gem install clickatell   (Clickatell users only)
+1. Install
+> script/plugin install git://github.com/blythedunham/smsonrails.git
 
-2. rake sms:setup (generator with migration coming soon.)
-Or copy vendor/plugins/sms_on_rails/db/schema.db to a migration
+2. Configure
+> script/generate sms_on_rails setup
+For more options, run use the --help option
 
-2. Get an account with clickatell (git://github.com/blythedunham/smsonrails.git)
-or setup your email in your rails app
+3. Acquire Email and/or SMS Accounts
+Get an account with clickatell (git://github.com/blythedunham/smsonrails.git) or setup your email
 
-3. Edit your applications configuration in environment.rb with settings and password.
- Also include all models in you config.rb if you wish to use the vanilla settings.
+4. Migrate
+You can modify the newly generated migration file or run the vanilla
+> rake db/migrate
+
+5. Edit your applications configuration in environment.rb with settings and password.
 
 ----- ENVIRONMENT.RB -----------------
 SmsOnRails::ServiceProviders::Clickatell.config =
@@ -60,7 +63,7 @@ require 'sms_on_rails/all_models'
 ----- ENVIRONMENT.RB -----------------
 
 
-4. GO!
+GO!
 
 #Clickatell does not need a carrier
 SmsOnRails::Outbound.create_sms '12065551234', 'Send this test message', :send_immediately => true

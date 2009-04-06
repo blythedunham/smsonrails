@@ -12,16 +12,21 @@ Description:
       - create admin sms views and setup restful routes
     dependencies
       - install dependent plugins and gems (enviroment does this automatically)
-  
+    migration (default)
+      - create a migration template for sms tables. Use --models-only or --carriers-only 
+      options if you want only the sms models or phone carriers table respectively
+
 Example:
   Set up the environment and create models in app/models/sms_on_rails
     ./script/generate sms_on_rails setup environment models
 
-  Just setup the environment
+  Just setup the environment and create the migration
     ./script/generate sms_on_rails setup
 
   Setup the views
     ./script/generate sms_on_rails setup views
 
+  Create a migration for just the models (other than phone carriers)
+    ./script/generate sms_on_rails setup migration --models-only
 
 

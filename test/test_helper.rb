@@ -1,16 +1,7 @@
-require 'rubygems'
-require 'active_support'
-require 'active_support/test_case'
-require 'active_record'
-require 'test/unit'
 
 dir = File.dirname(__FILE__)
-require dir +'/prepare_test'
+require dir + '/run'
 require dir +'/../init'
-require dir + '/../db/schema.rb'
-
-
-
 
 begin
   if File.exists?(sdir = File.join(dir, '/../../static_record_cache') )
