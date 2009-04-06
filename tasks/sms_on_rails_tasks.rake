@@ -17,10 +17,9 @@ namespace :sms do
     
       desc "#{command.to_s.titleize} #{table.titleize}"
       task "#{command}_#{table}".to_sym => :environment do
-        str = SmsOnRails::SchemaHelper.schema(command, table, :safe => true)
-        puts str
-        eval str
+        eval SmsOnRails::SchemaHelper.schema(command, table, :safe => true)
       end
+
     end
     desc '#{command.to_s.titleize} All SMS database tables'
     task "#{command}_tables".to_sym => schema_tables.collect{|t| "sms:#{command}_#{t}"}
