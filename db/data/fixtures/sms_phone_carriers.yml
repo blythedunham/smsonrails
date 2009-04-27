@@ -10,9 +10,10 @@ carrier_2:
 
 carrier_3:
   id: "3"
-  name: mmode
+  name: Cingular mmode
   email_domain: "mmode.com"
-
+  notes: "formerly AT&T, then Cingular, now AT&T Wireless - Original grandfathered rateplan customers"
+  
 carrier_4:
   id: "4"
   name: Cellular One
@@ -20,7 +21,7 @@ carrier_4:
 
 carrier_5:
   id: "5"
-  name: AT&T (Cingular)
+  name: AT&T
   email_domain: "txt.att.net"
 
 carrier_6:
@@ -62,4 +63,48 @@ carrier_13:
   id: "13"
   name: Amp'd
   email_domain: "ampdpix.com"
+
+carrier_14:
+  id: 14
+  name: AT&T Formerly Cingular
+  email_domain: "cingularme.com"
+
+carrier_15:
+  id: 15
+  name: AT&T Formerly Cingular MMS
+  email_domain: "mms.att.net"
+
+carrier_16:
+  id: 16
+  name: Alaska Communications Systems
+  email_domain: "msg.acsalaska.com"
+
+carrier_17:
+  id: 17
+  name: AT&T Enterprise Paging
+  email_domain: "number@page.att.net"
+
+carrier_18:
+  id: 22
+  name: MetroPCS
+  email_domain: "mymetropcs.com"
+
+carrier_19:
+  id: 19
+  name: Plateau Wireless
+  email_domain: "smsx.plateaugsm.com"
+
+carrier_20:
+  id: 20
+  name: 7-11 Speakout
+  email_domain: "cingularme.com"
+
+carrier_21:
+  id: 21
+  name: Cricket
+  email_domain: "sms.mycricket.com"
+
+
+
+
 

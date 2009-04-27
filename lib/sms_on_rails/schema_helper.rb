@@ -18,10 +18,11 @@ module SmsOnRails
         str = "ActiveRecord::Schema.define do\n"
         str << self.send(command, *files)
         str << "\nend"
+        str
       end
 
       def file_to_string(file, options={})
-        File.read(File.join(File.dirname(__FILE__), "../../db/#{file}.rb"))
+        File.read(File.join(File.dirname(__FILE__), "../../db/migrate/#{file}.rb"))
       end
 
       def drop_tables(file, options={})

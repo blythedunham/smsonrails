@@ -4,17 +4,16 @@ Description:
     The following actions can be specified seperately or together
 
     environment (default)
-      - add the configuration to config/environment.rb
+      - add the configuration to config/environment.rb and runs dependencies
     models
       - copy the vanilla models up to app/models/sms_on_rails so they can be
-        edited. By default the models in vendor/plugins/sms_on_rails/lib/models are used
-    views
-      - create admin sms views and setup restful routes
+        edited/overwritten accordingly
     dependencies
       - install dependent plugins and gems (enviroment does this automatically)
     migration (default)
-      - create a migration template for sms tables. Use --models-only or --carriers-only 
-      options if you want only the sms models or phone carriers table respectively
+      - creates three migration templates for sms tables. To skip one, for example if
+        only the carriers and phone numbers are desired,
+        use --skip-models, --skip-phone-number or --skip-carriers to skip
 
 Example:
   Set up the environment and create models in app/models/sms_on_rails
@@ -26,7 +25,7 @@ Example:
   Setup the views
     ./script/generate sms_on_rails setup views
 
-  Create a migration for just the models (other than phone carriers)
-    ./script/generate sms_on_rails setup migration --models-only
+  Create a migration skipping models migration
+    ./script/generate sms_on_rails setup migration --skip-models
 
 

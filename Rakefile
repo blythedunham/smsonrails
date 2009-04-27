@@ -13,12 +13,16 @@ end
 desc "Prepares the test database"
 task :prepare_test  do
   require File.dirname(__FILE__) + '/test/run'
+
+  migration_dir = File.dirname(__FILE__), ""
+  #ActiveRecord::Migrator.migrate("db/migrate/", ENV["VERSION"] ? ENV["VERSION"].to_i : nil)
+
   require File.dirname(__FILE__) + '/lib/sms_on_rails/schema_helper'
-  instance_eval SmsOnRails::SchemaHelper.schema(:create, 'email_gateway_carrier_table', 'model_tables')
+  instance_eval SmsOnRails::SchemaHelper.schema(:create, 'sms_on_rails_carrier_tables',  'sms_on_rails_phone_number_tables', 'sms_on_rails_model_tables' )
   puts "Seeding SMS tables..."
   require File.dirname(__FILE__) + '/test/test_helper.rb'
   load File.dirname(__FILE__) + '/db/seed_data.rb'
-  #system( "ruby #{File.join(File.dirname(__FILE__), '/test/prepare.rb' )} " )
+
 end
 
 desc 'Test the sms_on_rails plugin.'

@@ -9,6 +9,5 @@ module SmsOnRails
 
     include SmsOnRails::ModelSupport::PhoneCarrier
 
-
   end
 end

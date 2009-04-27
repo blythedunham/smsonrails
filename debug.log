@@ -1,0 +1,550 @@
+# Logfile created on Sat Apr 25 21:52:07 -0700 2009 by /
+  [4;36;1mSQL (0.2ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mSQL (0.5ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (2.0ms)[0m   [0mCREATE TABLE `schema_migrations` (`version` varchar(255) NOT NULL) ENGINE=InnoDB[0m
+  [4;36;1mSQL (44.3ms)[0m   [0;1mCREATE UNIQUE INDEX `unique_schema_migrations` ON `schema_migrations` (`version`)[0m
+  [4;35;1mSQL (0.9ms)[0m   [0mSHOW TABLES[0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mSQL (0.4ms)[0m   [0;1mSHOW TABLES[0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mSQL (0.4ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSmsOnRails::Inbound Columns (34.5ms)[0m   [0mSHOW FIELDS FROM `sms_inbounds`[0m
+  [4;36;1mSmsOnRails::Outbound Columns (27.4ms)[0m   [0;1mSHOW FIELDS FROM `sms_outbounds`[0m
+  [4;35;1mSmsOnRails::PhoneCarrier Columns (4.0ms)[0m   [0mSHOW FIELDS FROM `sms_phone_carriers`[0m
+  [4;36;1mSmsOnRails::PhoneCarrier Delete all (21.0ms)[0m   [0;1mDELETE FROM `sms_phone_carriers` [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mSQL (0.4ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (2.1ms)[0m   [0mDROP TABLE `sms_phone_carriers`[0m
+  [4;36;1mSQL (13.4ms)[0m   [0;1mCREATE TABLE `sms_phone_carriers` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `name` varchar(255), `email_domain` varchar(255), `notes` varchar(255), `options` varchar(255)) ENGINE=InnoDB[0m
+  [4;35;1mSQL (93.7ms)[0m   [0mCREATE UNIQUE INDEX `uk_phone_carriers_name` ON `sms_phone_carriers` (`name`)[0m
+  [4;36;1mSQL (0.9ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (3.1ms)[0m   [0mCREATE TABLE `phone_numbers` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `number` varchar(255) NOT NULL, `carrier_id` int(11), `owner_id` int(11), `white_list` tinyint(1) DEFAULT 0 NOT NULL, `do_not_send` varchar(255), `country_code` int(11) DEFAULT 1) ENGINE=InnoDB[0m
+  [4;36;1mSQL (8.0ms)[0m   [0;1mCREATE UNIQUE INDEX `uk_phone_numbers_number` ON `phone_numbers` (`number`)[0m
+  [4;35;1mSQL (0.5ms)[0m   [0mSHOW TABLES[0m
+  [4;36;1mSQL (17.6ms)[0m   [0;1mDROP TABLE `sms_drafts`[0m
+  [4;35;1mSQL (3.1ms)[0m   [0mCREATE TABLE `sms_drafts` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `message` varchar(255), `header` varchar(255), `footer` varchar(255), `status` varchar(255) DEFAULT 'NOT_PROCESSED' NOT NULL, `deliver_after` datetime, `delivery_date` datetime, `sender_id` int(11), `lock_version` int(11) DEFAULT 0 NOT NULL, `options` varchar(255), `updated_at` varchar(255), `created_at` varchar(255)) ENGINE=InnoDB[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (3.0ms)[0m   [0mDROP TABLE `sms_outbounds`[0m
+  [4;36;1mSQL (3.4ms)[0m   [0;1mCREATE TABLE `sms_outbounds` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `sms_phone_number_id` int(11) NOT NULL, `sms_draft_id` int(11), `status` varchar(255) DEFAULT 'NOT_PROCESSED' NOT NULL, `retry_count` int(11) DEFAULT 0 NOT NULL, `sub_status` varchar(255), `notes` varchar(255), `created_at` datetime, `processed_on` datetime, `lock_version` int(11) DEFAULT 0 NOT NULL, `sms_service_provider_id` int(11), `options` varchar(255), `send_priority` int(11) DEFAULT 0 NOT NULL) ENGINE=InnoDB[0m
+  [4;35;1mSQL (6.2ms)[0m   [0mALTER TABLE sms_outbounds ADD COLUMN `unique_id` varchar(255) character set latin1 collate latin1_bin default NULL[0m
+  [4;36;1mSQL (7.2ms)[0m   [0;1mCREATE UNIQUE INDEX `uk_sms_outbounds_unique_id` ON `sms_outbounds` (`unique_id`)[0m
+  [4;35;1mSQL (8.7ms)[0m   [0mCREATE UNIQUE INDEX `uk_sms_outbounds_draft_phone_number` ON `sms_outbounds` (`sms_draft_id`, `sms_phone_number_id`)[0m
+  [4;36;1mSQL (15.8ms)[0m   [0;1mCREATE INDEX `idx_sms_outbounds_status_priority_draft` ON `sms_outbounds` (`status`, `send_priority`, `sms_draft_id`)[0m
+  [4;35;1mSQL (8.4ms)[0m   [0mCREATE INDEX `index_sms_outbounds_on_sms_phone_number_id` ON `sms_outbounds` (`sms_phone_number_id`)[0m
+  [4;36;1mSQL (0.5ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (2.2ms)[0m   [0mDROP TABLE `sms_inbounds`[0m
+  [4;36;1mSQL (2.7ms)[0m   [0;1mCREATE TABLE `sms_inbounds` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `sms_draft_id` int(11), `sms_phone_number_id` int(11) NOT NULL, `created_at` datetime, `sent_at` datetime, `message` datetime, `sms_service_provider_id` int(11)) ENGINE=InnoDB[0m
+  [4;35;1mSQL (9.6ms)[0m   [0mALTER TABLE sms_inbounds ADD COLUMN `unique_id` varchar(255) character set latin1 collate latin1_bin default NULL[0m
+  [4;36;1mSQL (12.7ms)[0m   [0;1mCREATE UNIQUE INDEX `uk_sms_inboundes_unique_id` ON `sms_inbounds` (`unique_id`)[0m
+  [4;35;1mSQL (6.4ms)[0m   [0mCREATE INDEX `index_sms_inbounds_on_sms_draft_id` ON `sms_inbounds` (`sms_draft_id`)[0m
+  [4;36;1mSQL (9.6ms)[0m   [0;1mCREATE INDEX `index_sms_inbounds_on_sms_phone_number_id` ON `sms_inbounds` (`sms_phone_number_id`)[0m
+  [4;35;1mSmsOnRails::Inbound Columns (3.5ms)[0m   [0mSHOW FIELDS FROM `sms_inbounds`[0m
+  [4;36;1mSmsOnRails::Outbound Columns (2.2ms)[0m   [0;1mSHOW FIELDS FROM `sms_outbounds`[0m
+  [4;35;1mSmsOnRails::PhoneCarrier Columns (2.5ms)[0m   [0mSHOW FIELDS FROM `sms_phone_carriers`[0m
+  [4;36;1mSmsOnRails::PhoneCarrier Delete all (0.2ms)[0m   [0;1mDELETE FROM `sms_phone_carriers` [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mSQL (0.5ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (2.3ms)[0m   [0mDROP TABLE `sms_phone_carriers`[0m
+  [4;36;1mSQL (36.4ms)[0m   [0;1mCREATE TABLE `sms_phone_carriers` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `name` varchar(255), `email_domain` varchar(255), `notes` varchar(255), `options` varchar(255)) ENGINE=InnoDB[0m
+  [4;35;1mSQL (9.0ms)[0m   [0mCREATE UNIQUE INDEX `uk_phone_carriers_name` ON `sms_phone_carriers` (`name`)[0m
+  [4;36;1mSQL (1.0ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (2.4ms)[0m   [0mDROP TABLE `phone_numbers`[0m
+  [4;36;1mSQL (3.3ms)[0m   [0;1mCREATE TABLE `phone_numbers` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `number` varchar(255) NOT NULL, `carrier_id` int(11), `owner_id` int(11), `white_list` tinyint(1) DEFAULT 0 NOT NULL, `do_not_send` varchar(255), `country_code` int(11) DEFAULT 1) ENGINE=InnoDB[0m
+  [4;35;1mSQL (9.2ms)[0m   [0mCREATE UNIQUE INDEX `uk_phone_numbers_number` ON `phone_numbers` (`number`)[0m
+  [4;36;1mSQL (0.5ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (1.9ms)[0m   [0mDROP TABLE `sms_drafts`[0m
+  [4;36;1mSQL (2.9ms)[0m   [0;1mCREATE TABLE `sms_drafts` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `message` varchar(255), `header` varchar(255), `footer` varchar(255), `status` varchar(255) DEFAULT 'NOT_PROCESSED' NOT NULL, `deliver_after` datetime, `delivery_date` datetime, `sender_id` int(11), `lock_version` int(11) DEFAULT 0 NOT NULL, `options` varchar(255), `updated_at` varchar(255), `created_at` varchar(255)) ENGINE=InnoDB[0m
+  [4;35;1mSQL (0.7ms)[0m   [0mSHOW TABLES[0m
+  [4;36;1mSQL (2.3ms)[0m   [0;1mDROP TABLE `sms_outbounds`[0m
+  [4;35;1mSQL (2.8ms)[0m   [0mCREATE TABLE `sms_outbounds` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `sms_phone_number_id` int(11) NOT NULL, `sms_draft_id` int(11), `status` varchar(255) DEFAULT 'NOT_PROCESSED' NOT NULL, `retry_count` int(11) DEFAULT 0 NOT NULL, `sub_status` varchar(255), `notes` varchar(255), `created_at` datetime, `processed_on` datetime, `lock_version` int(11) DEFAULT 0 NOT NULL, `sms_service_provider_id` int(11), `options` varchar(255), `send_priority` int(11) DEFAULT 0 NOT NULL) ENGINE=InnoDB[0m
+  [4;36;1mSQL (9.6ms)[0m   [0;1mALTER TABLE sms_outbounds ADD COLUMN `unique_id` varchar(255) character set latin1 collate latin1_bin default NULL[0m
+  [4;35;1mSQL (10.0ms)[0m   [0mCREATE UNIQUE INDEX `uk_sms_outbounds_unique_id` ON `sms_outbounds` (`unique_id`)[0m
+  [4;36;1mSQL (10.3ms)[0m   [0;1mCREATE UNIQUE INDEX `uk_sms_outbounds_draft_phone_number` ON `sms_outbounds` (`sms_draft_id`, `sms_phone_number_id`)[0m
+  [4;35;1mSQL (7.9ms)[0m   [0mCREATE INDEX `idx_sms_outbounds_status_priority_draft` ON `sms_outbounds` (`status`, `send_priority`, `sms_draft_id`)[0m
+  [4;36;1mSQL (9.1ms)[0m   [0;1mCREATE INDEX `index_sms_outbounds_on_sms_phone_number_id` ON `sms_outbounds` (`sms_phone_number_id`)[0m
+  [4;35;1mSQL (0.7ms)[0m   [0mSHOW TABLES[0m
+  [4;36;1mSQL (2.7ms)[0m   [0;1mDROP TABLE `sms_inbounds`[0m
+  [4;35;1mSQL (3.3ms)[0m   [0mCREATE TABLE `sms_inbounds` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `sms_draft_id` int(11), `sms_phone_number_id` int(11) NOT NULL, `created_at` datetime, `sent_at` datetime, `message` datetime, `sms_service_provider_id` int(11)) ENGINE=InnoDB[0m
+  [4;36;1mSQL (9.8ms)[0m   [0;1mALTER TABLE sms_inbounds ADD COLUMN `unique_id` varchar(255) character set latin1 collate latin1_bin default NULL[0m
+  [4;35;1mSQL (6.3ms)[0m   [0mCREATE UNIQUE INDEX `uk_sms_inboundes_unique_id` ON `sms_inbounds` (`unique_id`)[0m
+  [4;36;1mSQL (8.2ms)[0m   [0;1mCREATE INDEX `index_sms_inbounds_on_sms_draft_id` ON `sms_inbounds` (`sms_draft_id`)[0m
+  [4;35;1mSQL (9.5ms)[0m   [0mCREATE INDEX `index_sms_inbounds_on_sms_phone_number_id` ON `sms_inbounds` (`sms_phone_number_id`)[0m
+  [4;36;1mSmsOnRails::Inbound Columns (2.9ms)[0m   [0;1mSHOW FIELDS FROM `sms_inbounds`[0m
+  [4;35;1mSmsOnRails::Outbound Columns (3.1ms)[0m   [0mSHOW FIELDS FROM `sms_outbounds`[0m
+  [4;36;1mSmsOnRails::PhoneCarrier Columns (2.1ms)[0m   [0;1mSHOW FIELDS FROM `sms_phone_carriers`[0m
+  [4;35;1mSmsOnRails::PhoneCarrier Delete all (0.2ms)[0m   [0mDELETE FROM `sms_phone_carriers` [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mSQL (2.2ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (1.6ms)[0m   [0mDROP TABLE `sms_phone_carriers`[0m
+  [4;36;1mSQL (27.1ms)[0m   [0;1mCREATE TABLE `sms_phone_carriers` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `name` varchar(255), `email_domain` varchar(255), `notes` varchar(255), `options` varchar(255)) ENGINE=InnoDB[0m
+  [4;35;1mSQL (6.1ms)[0m   [0mCREATE UNIQUE INDEX `uk_phone_carriers_name` ON `sms_phone_carriers` (`name`)[0m
+  [4;36;1mSQL (0.5ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (2.0ms)[0m   [0mDROP TABLE `phone_numbers`[0m
+  [4;36;1mSQL (2.8ms)[0m   [0;1mCREATE TABLE `phone_numbers` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `number` varchar(255) NOT NULL, `carrier_id` int(11), `owner_id` int(11), `white_list` tinyint(1) DEFAULT 0 NOT NULL, `do_not_send` varchar(255), `country_code` int(11) DEFAULT 1) ENGINE=InnoDB[0m
+  [4;35;1mSQL (7.6ms)[0m   [0mCREATE UNIQUE INDEX `uk_phone_numbers_number` ON `phone_numbers` (`number`)[0m
+  [4;36;1mSQL (0.5ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (1.9ms)[0m   [0mDROP TABLE `sms_drafts`[0m
+  [4;36;1mSQL (3.7ms)[0m   [0;1mCREATE TABLE `sms_drafts` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `message` varchar(255), `header` varchar(255), `footer` varchar(255), `status` varchar(255) DEFAULT 'NOT_PROCESSED' NOT NULL, `deliver_after` datetime, `delivery_date` datetime, `sender_id` int(11), `lock_version` int(11) DEFAULT 0 NOT NULL, `options` varchar(255), `updated_at` varchar(255), `created_at` varchar(255)) ENGINE=InnoDB[0m
+  [4;35;1mSQL (0.5ms)[0m   [0mSHOW TABLES[0m
+  [4;36;1mSQL (2.1ms)[0m   [0;1mDROP TABLE `sms_outbounds`[0m
+  [4;35;1mSQL (3.3ms)[0m   [0mCREATE TABLE `sms_outbounds` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `sms_phone_number_id` int(11) NOT NULL, `sms_draft_id` int(11), `status` varchar(255) DEFAULT 'NOT_PROCESSED' NOT NULL, `retry_count` int(11) DEFAULT 0 NOT NULL, `sub_status` varchar(255), `notes` varchar(255), `created_at` datetime, `processed_on` datetime, `lock_version` int(11) DEFAULT 0 NOT NULL, `sms_service_provider_id` int(11), `options` varchar(255), `send_priority` int(11) DEFAULT 0 NOT NULL) ENGINE=InnoDB[0m
+  [4;36;1mSQL (6.8ms)[0m   [0;1mALTER TABLE sms_outbounds ADD COLUMN `unique_id` varchar(255) character set latin1 collate latin1_bin default NULL[0m
+  [4;35;1mSQL (6.7ms)[0m   [0mCREATE UNIQUE INDEX `uk_sms_outbounds_unique_id` ON `sms_outbounds` (`unique_id`)[0m
+  [4;36;1mSQL (9.1ms)[0m   [0;1mCREATE UNIQUE INDEX `uk_sms_outbounds_draft_phone_number` ON `sms_outbounds` (`sms_draft_id`, `sms_phone_number_id`)[0m
+  [4;35;1mSQL (15.3ms)[0m   [0mCREATE INDEX `idx_sms_outbounds_status_priority_draft` ON `sms_outbounds` (`status`, `send_priority`, `sms_draft_id`)[0m
+  [4;36;1mSQL (9.4ms)[0m   [0;1mCREATE INDEX `index_sms_outbounds_on_sms_phone_number_id` ON `sms_outbounds` (`sms_phone_number_id`)[0m
+  [4;35;1mSQL (0.5ms)[0m   [0mSHOW TABLES[0m
+  [4;36;1mSQL (1.8ms)[0m   [0;1mDROP TABLE `sms_inbounds`[0m
+  [4;35;1mSQL (2.2ms)[0m   [0mCREATE TABLE `sms_inbounds` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `sms_draft_id` int(11), `sms_phone_number_id` int(11) NOT NULL, `created_at` datetime, `sent_at` datetime, `message` datetime, `sms_service_provider_id` int(11)) ENGINE=InnoDB[0m
+  [4;36;1mSQL (5.5ms)[0m   [0;1mALTER TABLE sms_inbounds ADD COLUMN `unique_id` varchar(255) character set latin1 collate latin1_bin default NULL[0m
+  [4;35;1mSQL (8.2ms)[0m   [0mCREATE UNIQUE INDEX `uk_sms_inboundes_unique_id` ON `sms_inbounds` (`unique_id`)[0m
+  [4;36;1mSQL (7.9ms)[0m   [0;1mCREATE INDEX `index_sms_inbounds_on_sms_draft_id` ON `sms_inbounds` (`sms_draft_id`)[0m
+  [4;35;1mSQL (6.6ms)[0m   [0mCREATE INDEX `index_sms_inbounds_on_sms_phone_number_id` ON `sms_inbounds` (`sms_phone_number_id`)[0m
+  [4;36;1mSmsOnRails::Inbound Columns (2.1ms)[0m   [0;1mSHOW FIELDS FROM `sms_inbounds`[0m
+  [4;35;1mSmsOnRails::Outbound Columns (2.8ms)[0m   [0mSHOW FIELDS FROM `sms_outbounds`[0m
+  [4;36;1mSmsOnRails::PhoneCarrier Columns (2.3ms)[0m   [0;1mSHOW FIELDS FROM `sms_phone_carriers`[0m
+  [4;35;1mSmsOnRails::PhoneCarrier Delete all (0.3ms)[0m   [0mDELETE FROM `sms_phone_carriers` [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mSQL (0.4ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (2.4ms)[0m   [0mDROP TABLE `sms_phone_carriers`[0m
+  [4;36;1mSQL (23.5ms)[0m   [0;1mCREATE TABLE `sms_phone_carriers` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `name` varchar(255), `email_domain` varchar(255), `notes` varchar(255), `options` varchar(255)) ENGINE=InnoDB[0m
+  [4;35;1mSQL (7.6ms)[0m   [0mCREATE UNIQUE INDEX `uk_phone_carriers_name` ON `sms_phone_carriers` (`name`)[0m
+  [4;36;1mSQL (0.5ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (1.8ms)[0m   [0mDROP TABLE `phone_numbers`[0m
+  [4;36;1mSQL (4.1ms)[0m   [0;1mCREATE TABLE `phone_numbers` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `number` varchar(255) NOT NULL, `carrier_id` int(11), `owner_id` int(11), `white_list` tinyint(1) DEFAULT 0 NOT NULL, `do_not_send` varchar(255), `country_code` int(11) DEFAULT 1) ENGINE=InnoDB[0m
+  [4;35;1mSQL (9.5ms)[0m   [0mCREATE UNIQUE INDEX `uk_phone_numbers_number` ON `phone_numbers` (`number`)[0m
+  [4;36;1mSQL (0.8ms)[0m   [0;1mSHOW TABLES[0m
+  [4;35;1mSQL (2.7ms)[0m   [0mDROP TABLE `sms_drafts`[0m
+  [4;36;1mSQL (4.9ms)[0m   [0;1mCREATE TABLE `sms_drafts` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `message` varchar(255), `header` varchar(255), `footer` varchar(255), `status` varchar(255) DEFAULT 'NOT_PROCESSED' NOT NULL, `deliver_after` datetime, `delivery_date` datetime, `sender_id` int(11), `lock_version` int(11) DEFAULT 0 NOT NULL, `options` varchar(255), `updated_at` varchar(255), `created_at` varchar(255)) ENGINE=InnoDB[0m
+  [4;35;1mSQL (0.6ms)[0m   [0mSHOW TABLES[0m
+  [4;36;1mSQL (2.4ms)[0m   [0;1mDROP TABLE `sms_outbounds`[0m
+  [4;35;1mSQL (2.4ms)[0m   [0mCREATE TABLE `sms_outbounds` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `sms_phone_number_id` int(11) NOT NULL, `sms_draft_id` int(11), `status` varchar(255) DEFAULT 'NOT_PROCESSED' NOT NULL, `retry_count` int(11) DEFAULT 0 NOT NULL, `sub_status` varchar(255), `notes` varchar(255), `created_at` datetime, `processed_on` datetime, `lock_version` int(11) DEFAULT 0 NOT NULL, `sms_service_provider_id` int(11), `options` varchar(255), `send_priority` int(11) DEFAULT 0 NOT NULL) ENGINE=InnoDB[0m
+  [4;36;1mSQL (7.5ms)[0m   [0;1mALTER TABLE sms_outbounds ADD COLUMN `unique_id` varchar(255) character set latin1 collate latin1_bin default NULL[0m
+  [4;35;1mSQL (5.9ms)[0m   [0mCREATE UNIQUE INDEX `uk_sms_outbounds_unique_id` ON `sms_outbounds` (`unique_id`)[0m
+  [4;36;1mSQL (7.0ms)[0m   [0;1mCREATE UNIQUE INDEX `uk_sms_outbounds_draft_phone_number` ON `sms_outbounds` (`sms_draft_id`, `sms_phone_number_id`)[0m
+  [4;35;1mSQL (11.0ms)[0m   [0mCREATE INDEX `idx_sms_outbounds_status_priority_draft` ON `sms_outbounds` (`status`, `send_priority`, `sms_draft_id`)[0m
+  [4;36;1mSQL (6.6ms)[0m   [0;1mCREATE INDEX `index_sms_outbounds_on_sms_phone_number_id` ON `sms_outbounds` (`sms_phone_number_id`)[0m
+  [4;35;1mSQL (0.5ms)[0m   [0mSHOW TABLES[0m
+  [4;36;1mSQL (2.0ms)[0m   [0;1mDROP TABLE `sms_inbounds`[0m
+  [4;35;1mSQL (2.2ms)[0m   [0mCREATE TABLE `sms_inbounds` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `sms_draft_id` int(11), `sms_phone_number_id` int(11) NOT NULL, `created_at` datetime, `sent_at` datetime, `message` datetime, `sms_service_provider_id` int(11)) ENGINE=InnoDB[0m
+  [4;36;1mSQL (7.9ms)[0m   [0;1mALTER TABLE sms_inbounds ADD COLUMN `unique_id` varchar(255) character set latin1 collate latin1_bin default NULL[0m
+  [4;35;1mSQL (8.0ms)[0m   [0mCREATE UNIQUE INDEX `uk_sms_inboundes_unique_id` ON `sms_inbounds` (`unique_id`)[0m
+  [4;36;1mSQL (10.1ms)[0m   [0;1mCREATE INDEX `index_sms_inbounds_on_sms_draft_id` ON `sms_inbounds` (`sms_draft_id`)[0m
+  [4;35;1mSQL (8.3ms)[0m   [0mCREATE INDEX `index_sms_inbounds_on_sms_phone_number_id` ON `sms_inbounds` (`sms_phone_number_id`)[0m
+  [4;36;1mSmsOnRails::Inbound Columns (3.3ms)[0m   [0;1mSHOW FIELDS FROM `sms_inbounds`[0m
+  [4;35;1mSmsOnRails::Outbound Columns (2.6ms)[0m   [0mSHOW FIELDS FROM `sms_outbounds`[0m
+  [4;36;1mSmsOnRails::PhoneCarrier Columns (1.6ms)[0m   [0;1mSHOW FIELDS FROM `sms_phone_carriers`[0m
+  [4;35;1mSmsOnRails::PhoneCarrier Delete all (0.3ms)[0m   [0mDELETE FROM `sms_phone_carriers` [0m
+  [4;36;1mSmsOnRails::PhoneCarrier Delete all (1.9ms)[0m   [0;1mDELETE FROM `sms_phone_carriers` [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mSmsOnRails::Inbound Columns (3.2ms)[0m   [0;1mSHOW FIELDS FROM `sms_inbounds`[0m
+  [4;35;1mSmsOnRails::Outbound Columns (2.0ms)[0m   [0mSHOW FIELDS FROM `sms_outbounds`[0m
+  [4;36;1mSmsOnRails::PhoneCarrier Columns (3.7ms)[0m   [0;1mSHOW FIELDS FROM `sms_phone_carriers`[0m
+  [4;35;1mSmsOnRails::PhoneCarrier Delete all (0.3ms)[0m   [0mDELETE FROM `sms_phone_carriers` [0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mSmsOnRails::PhoneCarrier Delete all (1.8ms)[0m   [0;1mDELETE FROM `sms_phone_carriers` [0m
+  [4;35;1mSQL (0.2ms)[0m   [0mSET NAMES 'utf8'[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
+  [4;35;1mSmsOnRails::PhoneCarrier Delete all (1.1ms)[0m   [0mDELETE FROM `sms_phone_carriers` [0m
+  [4;36;1mSmsOnRails::Outbound Delete all (0.2ms)[0m   [0;1mDELETE FROM `sms_outbounds` [0m
+  [4;35;1mSmsOnRails::Draft Columns (1.8ms)[0m   [0mSHOW FIELDS FROM `sms_drafts`[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Draft Create (0.3ms)[0m   [0mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('hi', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:26', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:26')[0m
+  [4;36;1mSQL (0.8ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.7ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (number in ('12065552476')) [0m
+  [4;36;1mSmsOnRails::PhoneNumber Columns (1.7ms)[0m   [0;1mSHOW FIELDS FROM `phone_numbers`[0m
+  [4;35;1mSQL (0.4ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0;1mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065552476', NULL, 0, NULL)[0m
+  [4;35;1mSQL (0.6ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.4ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Create (0.3ms)[0m   [0mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 1, 0, NULL, 1, NULL, 0, NULL, '2009-04-26 10:21:26')[0m
+  [4;36;1mSQL (0.6ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Update with optimistic locking (0.4ms)[0m   [0;1m UPDATE `sms_outbounds`
+ SET `status` = 'PROCESSING', `lock_version` = 1
+ WHERE id = 1
+ AND `lock_version` = 0
+[0m
+  [4;35;1mSQL (3.0ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::Outbound Delete all (1.1ms)[0m   [0;1mDELETE FROM `sms_outbounds` [0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Draft Create (0.3ms)[0m   [0;1mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('hi', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:26', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:26')[0m
+  [4;35;1mSQL (0.5ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.2ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (number in ('12065552476')) [0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Create (0.6ms)[0m   [0;1mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 1, 0, NULL, 2, NULL, 0, NULL, '2009-04-26 10:21:26')[0m
+  [4;35;1mSQL (0.5ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::Outbound Load (0.3ms)[0m   [0;1mSELECT * FROM `sms_outbounds` LIMIT 1[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Update with optimistic locking (0.4ms)[0m   [0;1m UPDATE `sms_outbounds`
+ SET `notes` = 'something fun', `lock_version` = 1
+ WHERE id = 2
+ AND `lock_version` = 0
+[0m
+  [4;35;1mSQL (0.5ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Update with optimistic locking (0.2ms)[0m   [0m UPDATE `sms_outbounds`
+ SET `status` = 'PROCESSING', `lock_version` = 1, `retry_count` = 1, `processed_on` = '2009-04-26 10:21:26'
+ WHERE id = 2
+ AND `lock_version` = 0
+[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mROLLBACK[0m
+SmsOnRails::Outbound lock failed
+Attempted to update a stale object
+  [4;35;1mSmsOnRails::Outbound Delete all (1.2ms)[0m   [0mDELETE FROM `sms_outbounds` [0m
+  [4;36;1mSQL (0.3ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Draft Create (0.3ms)[0m   [0mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('hi', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:26', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:26')[0m
+  [4;36;1mSQL (0.6ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.3ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (number in ('')) [0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mROLLBACK[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.2ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '', NULL, 0, NULL)[0m
+  [4;36;1mSmsOnRails::Outbound Create (0.2ms)[0m   [0;1mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 2, 0, NULL, 3, NULL, 0, NULL, '2009-04-26 10:21:26')[0m
+  [4;35;1mSQL (0.6ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.3ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Update with optimistic locking (0.5ms)[0m   [0m UPDATE `sms_outbounds`
+ SET `status` = 'PROCESSING', `lock_version` = 1, `retry_count` = 1, `processed_on` = '2009-04-26 10:21:26'
+ WHERE id = 3
+ AND `lock_version` = 0
+[0m
+  [4;36;1mSQL (0.5ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::Outbound Load (0.4ms)[0m   [0mSELECT * FROM `sms_outbounds` WHERE (`sms_outbounds`.`id` = 3) [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Update with optimistic locking (0.3ms)[0m   [0m UPDATE `sms_outbounds`
+ SET `notes` = 'FAILED: exc.to_s', `status` = 'FAILED', `lock_version` = 2
+ WHERE id = 3
+ AND `lock_version` = 1
+[0m
+  [4;36;1mSQL (0.8ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::Outbound Load (0.5ms)[0m   [0mSELECT * FROM `sms_outbounds` LIMIT 1[0m
+  [4;36;1mSmsOnRails::PhoneNumber Delete all (1.0ms)[0m   [0;1mDELETE FROM `phone_numbers` [0m
+  [4;35;1mSmsOnRails::PhoneNumber Delete all (0.2ms)[0m   [0mDELETE FROM `phone_numbers` [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065551234', NULL, 0, NULL)[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.5ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 3) [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065551235', NULL, 0, NULL)[0m
+  [4;36;1mSQL (0.6ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.2ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 4) [0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.2ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065552222', NULL, 0, NULL)[0m
+  [4;36;1mSQL (2.3ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.4ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 5) [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '442065553333', NULL, 0, NULL)[0m
+  [4;36;1mSQL (0.8ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.5ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 6) [0m
+  [4;36;1mSQL (0.3ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065554444', NULL, 0, NULL)[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.5ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 7) [0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.6ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (number in ('12065554444','442065553333','14155554444')) [0m
+  [4;35;1mSmsOnRails::PhoneNumber Delete all (1.1ms)[0m   [0mDELETE FROM `phone_numbers` [0m
+  [4;36;1mSmsOnRails::PhoneNumber Delete all (0.3ms)[0m   [0;1mDELETE FROM `phone_numbers` [0m
+  [4;35;1mSQL (0.3ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::PhoneNumber Create (0.4ms)[0m   [0;1mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065551234', NULL, 0, NULL)[0m
+  [4;35;1mSQL (0.7ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.9ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 8) [0m
+  [4;35;1mSQL (0.2ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::PhoneNumber Create (0.5ms)[0m   [0;1mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065551235', NULL, 0, NULL)[0m
+  [4;35;1mSQL (0.7ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.3ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 9) [0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::PhoneNumber Create (0.2ms)[0m   [0;1mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065552222', NULL, 0, NULL)[0m
+  [4;35;1mSQL (0.7ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.5ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 10) [0m
+  [4;35;1mSQL (0.3ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::PhoneNumber Create (0.5ms)[0m   [0;1mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '442065553333', NULL, 0, NULL)[0m
+  [4;35;1mSQL (1.4ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.4ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 11) [0m
+  [4;35;1mSQL (0.2ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0;1mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065554444', NULL, 0, NULL)[0m
+  [4;35;1mSQL (0.8ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.5ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 12) [0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.5ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (number in ('12065554444','442065553333','14155554444')) [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '14155554444', NULL, 0, NULL)[0m
+  [4;36;1mSQL (1.2ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::Outbound Delete all (0.9ms)[0m   [0mDELETE FROM `sms_outbounds` [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Draft Create (0.3ms)[0m   [0mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('multi test', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:26', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:26')[0m
+  [4;36;1mSQL (0.6ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.4ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (number in ('12065552476','12065551234','14155551234')) [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.7ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065552476', NULL, 0, NULL)[0m
+  [4;36;1mSQL (0.6ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::PhoneNumber Create (0.4ms)[0m   [0;1mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '14155551234', NULL, 0, NULL)[0m
+  [4;35;1mSQL (0.6ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Create (0.9ms)[0m   [0mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 8, 0, NULL, 4, NULL, 0, NULL, '2009-04-26 10:21:26')[0m
+  [4;36;1mSQL (0.6ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Create (0.2ms)[0m   [0;1mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 14, 0, NULL, 4, NULL, 0, NULL, '2009-04-26 10:21:26')[0m
+  [4;35;1mSQL (0.7ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.3ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Create (0.4ms)[0m   [0mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 15, 0, NULL, 4, NULL, 0, NULL, '2009-04-26 10:21:26')[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.4ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`number` = '12065552476') LIMIT 1[0m
+  [4;36;1mSmsOnRails::Outbound Load (0.5ms)[0m   [0;1mSELECT * FROM `sms_outbounds` WHERE (`sms_outbounds`.`sms_phone_number_id` = 14) LIMIT 1[0m
+  [4;35;1mSmsOnRails::Draft Load (0.3ms)[0m   [0mSELECT * FROM `sms_drafts` WHERE (`sms_drafts`.`id` = 4) [0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.2ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`number` = '12065551234') LIMIT 1[0m
+  [4;35;1mSmsOnRails::Outbound Load (0.3ms)[0m   [0mSELECT * FROM `sms_outbounds` WHERE (`sms_outbounds`.`sms_phone_number_id` = 8) LIMIT 1[0m
+  [4;36;1mSmsOnRails::Draft Load (0.2ms)[0m   [0;1mSELECT * FROM `sms_drafts` WHERE (`sms_drafts`.`id` = 4) [0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.2ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`number` = '14155551234') LIMIT 1[0m
+  [4;36;1mSmsOnRails::Outbound Load (0.3ms)[0m   [0;1mSELECT * FROM `sms_outbounds` WHERE (`sms_outbounds`.`sms_phone_number_id` = 15) LIMIT 1[0m
+  [4;35;1mSmsOnRails::Draft Load (0.2ms)[0m   [0mSELECT * FROM `sms_drafts` WHERE (`sms_drafts`.`id` = 4) [0m
+  [4;36;1mSmsOnRails::Outbound Delete all (0.9ms)[0m   [0;1mDELETE FROM `sms_outbounds` [0m
+  [4;35;1mSQL (0.7ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Draft Create (1.2ms)[0m   [0;1mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('hi', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:26', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:26')[0m
+  [4;35;1mSQL (1.0ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.4ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (number in ('12065552476')) [0m
+  [4;35;1mSQL (0.2ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Create (0.4ms)[0m   [0;1mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 14, 0, NULL, 5, NULL, 0, NULL, '2009-04-26 10:21:26')[0m
+  [4;35;1mSQL (0.5ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.2ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`number` = '12065552476') LIMIT 1[0m
+  [4;35;1mSmsOnRails::Outbound Load (0.2ms)[0m   [0mSELECT * FROM `sms_outbounds` WHERE (`sms_outbounds`.`sms_phone_number_id` = 14) LIMIT 1[0m
+  [4;36;1mSmsOnRails::Draft Load (0.2ms)[0m   [0;1mSELECT * FROM `sms_drafts` WHERE (`sms_drafts`.`id` = 5) [0m
+  [4;35;1mSmsOnRails::Outbound Delete all (0.9ms)[0m   [0mDELETE FROM `sms_outbounds` [0m
+  [4;36;1mSQL (0.3ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Draft Create (0.3ms)[0m   [0mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('hi', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:26', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:26')[0m
+  [4;36;1mSQL (0.8ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.5ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (number in ('12065552476')) [0m
+  [4;36;1mSQL (0.3ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Create (0.4ms)[0m   [0mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 14, 0, NULL, 6, NULL, 0, NULL, '2009-04-26 10:21:26')[0m
+  [4;36;1mSQL (0.6ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Update with optimistic locking (0.4ms)[0m   [0;1m UPDATE `sms_outbounds`
+ SET `status` = 'PROCESSING', `lock_version` = 1, `retry_count` = 1, `processed_on` = '2009-04-26 10:21:26'
+ WHERE id = 8
+ AND `lock_version` = 0
+[0m
+  [4;35;1mSQL (0.8ms)[0m   [0mCOMMIT[0m
+SMS DUMMY: send_message("12065552476", "hi", {})
+ RESPONSE:{:unique_id=>"4923:20090426102126Z.316"}
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Update with optimistic locking (0.4ms)[0m   [0m UPDATE `sms_outbounds`
+ SET `unique_id` = '4923:20090426102126Z.316', `status` = 'PROCESSED', `lock_version` = 2, `sms_service_provider_id` = 2, `processed_on` = '2009-04-26 10:21:26'
+ WHERE id = 8
+ AND `lock_version` = 1
+[0m
+  [4;36;1mSQL (1.1ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::Outbound Load (0.7ms)[0m   [0mSELECT * FROM `sms_outbounds` LIMIT 1[0m
+  [4;36;1mSmsOnRails::Outbound Delete all (1.0ms)[0m   [0;1mDELETE FROM `sms_outbounds` [0m
+  [4;35;1mSQL (0.3ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Draft Create (0.3ms)[0m   [0;1mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('hi', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:26', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:26')[0m
+  [4;35;1mSQL (0.8ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.7ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (number in ('12065552476','14155553456')) [0m
+  [4;35;1mSQL (0.2ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::PhoneNumber Create (0.4ms)[0m   [0;1mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '14155553456', NULL, 0, NULL)[0m
+  [4;35;1mSQL (0.8ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.3ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Create (0.3ms)[0m   [0mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 14, 0, NULL, 7, NULL, 0, NULL, '2009-04-26 10:21:26')[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.2ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Update with optimistic locking (0.4ms)[0m   [0;1m UPDATE `sms_outbounds`
+ SET `status` = 'PROCESSING', `lock_version` = 1, `retry_count` = 1, `processed_on` = '2009-04-26 10:21:26'
+ WHERE id = 9
+ AND `lock_version` = 0
+[0m
+  [4;35;1mSQL (0.7ms)[0m   [0mCOMMIT[0m
+SMS DUMMY: send_message("12065552476", "hi", {})
+ RESPONSE:{:unique_id=>"4923:20090426102127Z.15"}
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Update with optimistic locking (0.4ms)[0m   [0m UPDATE `sms_outbounds`
+ SET `unique_id` = '4923:20090426102127Z.15', `status` = 'PROCESSED', `lock_version` = 2, `sms_service_provider_id` = 2, `processed_on` = '2009-04-26 10:21:27'
+ WHERE id = 9
+ AND `lock_version` = 1
+[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.3ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Create (0.4ms)[0m   [0;1mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 16, 0, NULL, 7, NULL, 0, NULL, '2009-04-26 10:21:27')[0m
+  [4;35;1mSQL (0.7ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Update with optimistic locking (0.3ms)[0m   [0m UPDATE `sms_outbounds`
+ SET `status` = 'PROCESSING', `lock_version` = 1, `retry_count` = 1, `processed_on` = '2009-04-26 10:21:27'
+ WHERE id = 10
+ AND `lock_version` = 0
+[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mCOMMIT[0m
+SMS DUMMY: send_message("14155553456", "hi", {})
+ RESPONSE:{:unique_id=>"4923:20090426102127Z.781"}
+  [4;35;1mSQL (0.2ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Update with optimistic locking (0.4ms)[0m   [0;1m UPDATE `sms_outbounds`
+ SET `unique_id` = '4923:20090426102127Z.781', `status` = 'PROCESSED', `lock_version` = 2, `sms_service_provider_id` = 2, `processed_on` = '2009-04-26 10:21:27'
+ WHERE id = 10
+ AND `lock_version` = 1
+[0m
+  [4;35;1mSQL (0.7ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::Outbound Load (0.6ms)[0m   [0;1mSELECT * FROM `sms_outbounds` [0m
+  [4;35;1mSmsOnRails::Outbound Delete all (0.9ms)[0m   [0mDELETE FROM `sms_outbounds` [0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Draft Create (0.2ms)[0m   [0mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('$TIME$', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:27', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:27')[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.6ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (number in ('12065552476')) [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Create (0.4ms)[0m   [0mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 14, 0, NULL, 8, NULL, 0, NULL, '2009-04-26 10:21:27')[0m
+  [4;36;1mSQL (1.3ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.3ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Draft Create (0.4ms)[0m   [0;1mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('Format phone: $PHONE_NUMBER_DIGITS$ end', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:27', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:27')[0m
+  [4;35;1mSQL (0.6ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.2ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (number in ('12065552476')) [0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Create (0.3ms)[0m   [0;1mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 14, 0, NULL, 9, NULL, 0, NULL, '2009-04-26 10:21:27')[0m
+  [4;35;1mSQL (0.7ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.3ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Draft Create (0.3ms)[0m   [0mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('Format phone human: $PHONE_NUMBER$ end', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:27', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:27')[0m
+  [4;36;1mSQL (0.8ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.6ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (number in ('12065552476')) [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Create (0.4ms)[0m   [0mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 14, 0, NULL, 10, NULL, 0, NULL, '2009-04-26 10:21:27')[0m
+  [4;36;1mSQL (0.8ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Delete all (1.5ms)[0m   [0mDELETE FROM `phone_numbers` [0m
+  [4;36;1mSQL (0.3ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065551234', NULL, 0, NULL)[0m
+  [4;36;1mSQL (0.8ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.5ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 17) [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065551235', NULL, 0, NULL)[0m
+  [4;36;1mSQL (0.8ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.5ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 18) [0m
+  [4;36;1mSQL (0.3ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.4ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065552222', NULL, 0, NULL)[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.3ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 19) [0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '442065553333', NULL, 0, NULL)[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.5ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 20) [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12065554444', NULL, 0, NULL)[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.3ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (`phone_numbers`.`id` = 21) [0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.3ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (number in ('12063512476')) [0m
+  [4;35;1mSQL (0.5ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0;1mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12063512476', NULL, 0, NULL)[0m
+  [4;35;1mSQL (0.8ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Update (0.3ms)[0m   [0mUPDATE `phone_numbers` SET `do_not_send` = 'bounce' WHERE `id` = 22[0m
+  [4;36;1mSQL (0.5ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Draft Create (0.4ms)[0m   [0;1mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('some test message 2009-04-26 10:21:27', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:27', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:27')[0m
+  [4;35;1mSQL (0.5ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.3ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (number in ('12063512476')) [0m
+  [4;35;1mSQL (0.2ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Create (0.6ms)[0m   [0;1mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 22, 0, NULL, 11, NULL, 0, NULL, '2009-04-26 10:21:27')[0m
+  [4;35;1mSQL (0.9ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Delete all (0.4ms)[0m   [0mDELETE FROM `sms_outbounds` WHERE ((sms_phone_number_id = 22)) [0m
+  [4;36;1mSmsOnRails::Inbound Delete all (0.3ms)[0m   [0;1mDELETE FROM `sms_inbounds` WHERE ((sms_phone_number_id = 22)) [0m
+  [4;35;1mSmsOnRails::PhoneNumber Destroy (0.2ms)[0m   [0mDELETE FROM `phone_numbers` WHERE `id` = 22[0m
+  [4;36;1mSQL (1.2ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.3ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Draft Create (0.4ms)[0m   [0;1mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('some test message 2009-04-26 10:21:29', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:29', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:29')[0m
+  [4;35;1mSQL (1.4ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.3ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (number in ('12063512476')) [0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::PhoneNumber Create (0.2ms)[0m   [0;1mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12063512476', NULL, 0, NULL)[0m
+  [4;35;1mSQL (0.6ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Create (0.5ms)[0m   [0mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 23, 0, NULL, 12, NULL, 0, NULL, '2009-04-26 10:21:29')[0m
+  [4;36;1mSQL (0.8ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.4ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (number in ('12063512476')) [0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSQL (0.2ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Draft Create (0.2ms)[0m   [0mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('some test message 2009-04-26 10:21:30', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:30', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:30')[0m
+  [4;36;1mSQL (1.2ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.6ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (number in ('12063512476')) [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Create (0.4ms)[0m   [0mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 23, 0, NULL, 13, NULL, 0, NULL, '2009-04-26 10:21:30')[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.2ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Delete all (0.4ms)[0m   [0;1mDELETE FROM `sms_outbounds` WHERE ((sms_phone_number_id = 23)) [0m
+  [4;35;1mSmsOnRails::Inbound Delete all (0.3ms)[0m   [0mDELETE FROM `sms_inbounds` WHERE ((sms_phone_number_id = 23)) [0m
+  [4;36;1mSmsOnRails::PhoneNumber Destroy (0.2ms)[0m   [0;1mDELETE FROM `phone_numbers` WHERE `id` = 23[0m
+  [4;35;1mSQL (0.6ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Draft Create (0.3ms)[0m   [0mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('some test message #{Time.now.to_s(:db)}', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:30', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:30')[0m
+  [4;36;1mSQL (0.8ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.5ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (number in ('')) [0m
+  [4;36;1mSQL (0.3ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSQL (0.2ms)[0m   [0mROLLBACK[0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '', NULL, 0, NULL)[0m
+  [4;36;1mSmsOnRails::Outbound Create (0.3ms)[0m   [0;1mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 24, 0, NULL, 14, NULL, 0, NULL, '2009-04-26 10:21:30')[0m
+  [4;35;1mSQL (0.7ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.3ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (number in ('12063512476')) [0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::PhoneNumber Create (0.2ms)[0m   [0;1mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12063512476', NULL, 0, NULL)[0m
+  [4;35;1mSQL (0.8ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Update (0.5ms)[0m   [0mUPDATE `phone_numbers` SET `do_not_send` = 'bounce' WHERE `id` = 25[0m
+  [4;36;1mSQL (0.9ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.2ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Draft Create (0.4ms)[0m   [0;1mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('some test message 2009-04-26 10:21:30', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:30', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:30')[0m
+  [4;35;1mSQL (0.7ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.3ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (number in ('12063512476')) [0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::PhoneNumber Update (0.2ms)[0m   [0;1mUPDATE `phone_numbers` SET `carrier_id` = 1 WHERE `id` = 25[0m
+  [4;35;1mSQL (0.8ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.3ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Create (0.6ms)[0m   [0mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 25, 0, NULL, 15, NULL, 0, NULL, '2009-04-26 10:21:30')[0m
+  [4;36;1mSQL (0.6ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.2ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Delete all (0.4ms)[0m   [0;1mDELETE FROM `sms_outbounds` WHERE ((sms_phone_number_id = 25)) [0m
+  [4;35;1mSmsOnRails::Inbound Delete all (0.2ms)[0m   [0mDELETE FROM `sms_inbounds` WHERE ((sms_phone_number_id = 25)) [0m
+  [4;36;1mSmsOnRails::PhoneNumber Destroy (0.2ms)[0m   [0;1mDELETE FROM `phone_numbers` WHERE `id` = 25[0m
+  [4;35;1mSQL (0.7ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Draft Create (0.3ms)[0m   [0mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('some test message 2009-04-26 10:21:30', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:30', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:30')[0m
+  [4;36;1mSQL (20.2ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneNumber Load (0.4ms)[0m   [0mSELECT * FROM `phone_numbers` WHERE (number in ('12063512476')) [0m
+  [4;36;1mSQL (0.2ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::PhoneNumber Create (0.3ms)[0m   [0mINSERT INTO `phone_numbers` (`country_code`, `do_not_send`, `number`, `carrier_id`, `white_list`, `owner_id`) VALUES(1, NULL, '12063512476', NULL, 0, NULL)[0m
+  [4;36;1mSQL (0.7ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::PhoneNumber Update (0.3ms)[0m   [0;1mUPDATE `phone_numbers` SET `carrier_id` = 1 WHERE `id` = 26[0m
+  [4;35;1mSQL (0.6ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Create (0.4ms)[0m   [0mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 26, 0, NULL, 16, NULL, 0, NULL, '2009-04-26 10:21:31')[0m
+  [4;36;1mSQL (0.5ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSmsOnRails::PhoneCarrier Load (0.5ms)[0m   [0mSELECT * FROM `sms_phone_carriers` [0m
+Sent mail to 2063512476@vtext.com
+
+From: blythe@spongecell.com
+To: 2063512476@vtext.com
+Subject: Message from SmsOnRails
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+some test message 2009-04-26 10:21:30
+
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.4ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (number in ('12063512476')) [0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Draft Create (0.3ms)[0m   [0;1mINSERT INTO `sms_drafts` (`message`, `status`, `options`, `updated_at`, `delivery_date`, `lock_version`, `header`, `deliver_after`, `footer`, `sender_id`, `created_at`) VALUES('some test message 2009-04-26 10:21:31', 'NOT_PROCESSED', NULL, '2009-04-26 10:21:31', NULL, 0, NULL, NULL, NULL, NULL, '2009-04-26 10:21:31')[0m
+  [4;35;1mSQL (0.6ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSmsOnRails::PhoneNumber Load (0.2ms)[0m   [0;1mSELECT * FROM `phone_numbers` WHERE (number in ('12063512476')) [0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mCOMMIT[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mBEGIN[0m
+  [4;36;1mSmsOnRails::Outbound Create (0.3ms)[0m   [0;1mINSERT INTO `sms_outbounds` (`status`, `options`, `retry_count`, `unique_id`, `sms_service_provider_id`, `sms_phone_number_id`, `lock_version`, `notes`, `sms_draft_id`, `processed_on`, `send_priority`, `sub_status`, `created_at`) VALUES('NOT_PROCESSED', NULL, 0, NULL, NULL, 26, 0, NULL, 17, NULL, 0, NULL, '2009-04-26 10:21:31')[0m
+  [4;35;1mSQL (0.6ms)[0m   [0mCOMMIT[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mBEGIN[0m
+  [4;35;1mSmsOnRails::Outbound Delete all (0.3ms)[0m   [0mDELETE FROM `sms_outbounds` WHERE ((sms_phone_number_id = 26)) [0m
+  [4;36;1mSmsOnRails::Inbound Delete all (0.2ms)[0m   [0;1mDELETE FROM `sms_inbounds` WHERE ((sms_phone_number_id = 26)) [0m
+  [4;35;1mSmsOnRails::PhoneNumber Destroy (0.2ms)[0m   [0mDELETE FROM `phone_numbers` WHERE `id` = 26[0m
+  [4;36;1mSQL (0.6ms)[0m   [0;1mCOMMIT[0m

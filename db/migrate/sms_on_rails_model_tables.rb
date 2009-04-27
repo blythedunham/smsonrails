@@ -1,17 +1,6 @@
     use_fk = respond_to?(:add_foreign_key)
     puts "#{use_fk ? '': 'NOT'} USING FOREIGN KEYS"
     
-    create_table :sms_phone_numbers, :force => true do |t|
-      t.column :number, :string, :length => 20, :null => false
-      t.column :carrier_id, :integer, :default => nil
-      t.column :owner_id, :integer, :default => nil
-      t.column :white_list, :boolean, :null => false, :default => false
-      t.column :do_not_send, :string, :length => 30, :default => nil
-      t.column :country_code, :integer, :length => 5, :default => 1
-    end
-
-    add_index :sms_phone_numbers, :number, :unique => 'true', :name => 'uk_phone_numbers_number'
-
     create_table :sms_drafts, :force => true do |t|
       t.column :message, :string, :default => nil
       t.column :header, :string, :default => nil

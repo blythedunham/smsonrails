@@ -10,7 +10,7 @@ namespace :sms do
 
   desc 'Teardown'
   task :teardown => [:drop_tables]
-  schema_tables = %w(email_gateway_carrier_table model_tables)
+  schema_tables = %w(sms_on_rails_carrier_tables sms_on_rails_phone_number_tables sms_on_rails_model_tables)
 
   [:create, :drop].each do |command|
     schema_tables.each do |table|

@@ -16,8 +16,9 @@ rescue Exception => exc
   raise "Please install dependency static_record_cache"
 end
 
+
 require 'sms_on_rails/all_models'
 
-load File.dirname(__FILE__) + '/../db/seed_data.rb'
+require File.dirname(__FILE__) + '/../db/seed_data.rb'
 
 
