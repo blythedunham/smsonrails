@@ -14,8 +14,8 @@ module SmsOnRails
     module ClassMethods
       def find_all_by_numbers(numbers, options={})
 
-        creation_method = :create! if options.delete(:create!)
-        creation_method = :create if options.delete(:create)
+        creation_method = options.delete(:create)
+        creation_method = :create if creation_method.is_a?(TrueClass)
 
         numbers = [numbers].flatten
         return numbers if numbers.first.is_a?(ActiveRecord::Base)
@@ -30,7 +30,25 @@ module SmsOnRails
       end
 
       def find_by_phone_number(number, options={})
-        phone = find_all_by_numbers(number, options).first
+        find_all_by_numbers(number, options).first
+      end
+
+      def find_or_create_by_phone_number(digits)
+        attributes = if digits.is_a?(ActiveRecord::Base)
+          digits.new_record? ? digits.attributes : nil
+        elsif digits.is_a?(Hash)
+          digits.dup
+        elseif !digits.nil?
+          {:number => digits}
+        end
+
+        return digits unless attributes
+
+        attributes.stringify_keys!
+
+        number = attributes.delete('number')
+        phone = (find_by_number(number) if number)||new(:number => number)
+        phone.attributes = attributes
         phone
       end
 
@@ -62,8 +80,10 @@ module SmsOnRails
         base_number = digits(number)
         if base_number.length == 11 && base_number.first == '1'
           "(#{base_number[1..3]}) #{base_number[4..6]}-#{base_number[7..10]}"
-        else
+        elsif base_number.length > 0
           "+#{base_number}"
+        else
+          nil
         end
       end
     end

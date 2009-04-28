@@ -21,6 +21,8 @@ module SmsOnRails
 
         base.send :cattr_accessor, :default_options
 
+        base.send :accepts_nested_attributes_for, :phone_number
+
         base.send :include, InstanceMethods
         base.send :extend,  ClassMethods
       end
@@ -55,13 +57,25 @@ module SmsOnRails
 
       module InstanceMethods
 
-
         def phone_number_digits
-          self['phone_number_digits']||phone_number.number
+          self['phone_number_digits']||(phone_number ? phone_number.number : nil)
         end
 
+        def phone_number_digits=(digits)
+          self.phone_number ||= SmsOnRails::PhoneNumber.new
+          self.phone_number.number = digits
+          assign_existing_phone
+          self.phone_number.number
+        end
 
-        def draft_message; draft.message; end
+        def assign_phone_number(phone)
+          self.phone_number = SmsOnRails::PhoneNumber.find_or_create_by_phone_number(phone)
+        end
+
+        def assign_existing_phone; assign_phone_number(self.phone_number); end
+
+        def draft_message; draft.complete_message; end
+
 
         #Todo
         def sender_name; 'Blah'; end
@@ -70,7 +84,7 @@ module SmsOnRails
 
         # deliver_message is the actual call to the service provider to send the message
         # this method is called during deliver in the acts_as_deliverable
-        def deliver_message
+        def deliver_message(options)
           self.sms_service_provider||= default_service_provider
           result = (self.sms_service_provider).send_sms(self)
           self.unique_id = result[:unique_id] if result.is_a?(Hash)

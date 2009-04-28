@@ -2,13 +2,21 @@ require File.dirname(__FILE__)+'/../test_helper'
 
 #require 'ruby-debug'
 
+class SmsOnRails::Outbound < ActiveRecord::Base
+  def deliver_message_with_exception(options={})
+    raise Exception.new 'asdf'
+  end
+end
+
 class SmsOnRails::DeliveryAndLockingTest  < Test::Unit::TestCase
 
   def test_outbound_bad_number
+    SmsOnRails::Outbound.send :alias_method_chain, :deliver_message, :exception
     SmsOnRails::Outbound.delete_all
 
-    assert_raises(SmsOnRails::SmsError) {
-      sms = SmsOnRails::Outbound.send_immediately 'hi', 'aa'
+    sms = nil
+    assert_raises(Exception) {
+      sms = SmsOnRails::Outbound.send_immediately 'hi', '2065552476'
     }
 
     sms = SmsOnRails::Outbound.find :first
@@ -16,6 +24,8 @@ class SmsOnRails::DeliveryAndLockingTest  < Test::Unit::TestCase
 
     assert_equal('FAILED', sms.status)
     assert(sms.processed_on.to_i <= Time.now.to_i)
+  ensure
+    SmsOnRails::Outbound.send :alias_method, :deliver_message, :deliver_message_without_exception
   end
 
   def test_deliver_stale_record_should_raise_unlockable_error

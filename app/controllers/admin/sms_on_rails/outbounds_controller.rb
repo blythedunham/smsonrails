@@ -1,8 +1,6 @@
-class Admin::SmsOnRails::OutboundsController < ApplicationController
-
-  helper SmsOnRails::SmsHelper
-  # GET /sms_on_rails_outbounds
-  # GET /sms_on_rails_outbounds.xml
+class Admin::SmsOnRails::OutboundsController < Admin::SmsOnRails::BaseController
+  # GET /admin/sms/outbounds
+  # GET /admin/sms/outbounds.xml
   def index
     if params[:sms_draft_id]
       @draft = SmsOnRails::Draft.find( params[:sms_draft_id] )
@@ -17,8 +15,8 @@ class Admin::SmsOnRails::OutboundsController < ApplicationController
     end
   end
 
-  # GET /sms_on_rails_outbounds/1
-  # GET /sms_on_rails_outbounds/1.xml
+  # GET /admin/sms/outbounds/1
+  # GET /admin/sms/outbounds/1.xml
   def show
     @outbound = SmsOnRails::Outbound.find(params[:id])
 
@@ -28,8 +26,8 @@ class Admin::SmsOnRails::OutboundsController < ApplicationController
     end
   end
 
-  # GET /sms_on_rails_outbounds/new
-  # GET /sms_on_rails_outbounds/new.xml
+  # GET /admin/sms/outbounds/new
+  # GET /admin/sms/outbounds/new.xml
   def new
     @outbound = SmsOnRails::Outbound.new
 
@@ -39,13 +37,13 @@ class Admin::SmsOnRails::OutboundsController < ApplicationController
     end
   end
 
-  # GET /sms_on_rails_outbounds/1/edit
+  # GET /admin/sms/outbounds/1/edit
   def edit
     @outbound = SmsOnRails::Outbound.find(params[:id])
   end
 
-  # POST /sms_on_rails_outbounds
-  # POST /sms_on_rails_outbounds.xml
+  # POST /admin/sms/outbounds
+  # POST /admin/sms/outbounds.xml
   def create
     @outbound = SmsOnRails::Outbound.new(params[:outbound])
 
@@ -61,14 +59,13 @@ class Admin::SmsOnRails::OutboundsController < ApplicationController
     end
   end
 
-  # PUT /sms_on_rails_outbounds/1
-  # PUT /sms_on_rails_outbounds/1.xml
+  # PUT /admin/sms/outbounds/1
+  # PUT /admin/sms/outbounds/1.xml
   def update
     @outbound = SmsOnRails::Outbound.find(params[:id])
 
     respond_to do |format|
       if @outbound.update_attributes(params[:outbound])
-        logger.debug "VAL: #{@outbound.sms_service_provider_id}"
         flash[:notice] = 'SmsOnRails::Outbound was successfully updated.' + "VAL: #{@outbound.sms_service_provider_id}"
         format.html { redirect_to(sms_outbound_url(:id => @outbound)) }
         format.xml  { head :ok }
@@ -79,8 +76,8 @@ class Admin::SmsOnRails::OutboundsController < ApplicationController
     end
   end
 
-  # DELETE /sms_on_rails_outbounds/1
-  # DELETE /sms_on_rails_outbounds/1.xml
+  # DELETE /admin/sms/outbounds/1
+  # DELETE /admin/sms/outbounds/1.xml
   def destroy
     @outbound = SmsOnRails::Outbound.find(params[:id])
     @outbound.destroy

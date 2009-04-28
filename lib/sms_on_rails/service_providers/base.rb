@@ -35,6 +35,9 @@ module SmsOnRails
       cattr_accessor :logger
       @@logger ||= ActiveRecord::Base.logger
 
+      
+      def requires_carrier?; false; end
+
       # Deliver all the sms messages marked with this as its sms service provider
       def deliver
         Outbound.deliver(delivery_options.merge(:conditions => ['sms_service_provider_id = ?', self.provider_id]))

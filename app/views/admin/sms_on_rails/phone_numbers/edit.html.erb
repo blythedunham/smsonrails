@@ -8,8 +8,8 @@
     <%= f.text_field :number, :value => @phone_number.human_display %>
   </p>
   <p>
-    <%= f.label :carrier_id %><br />
-    <%= f.text_field :carrier_id %>
+    <%= f.label :carrier_id, 'Phone Carrier' %><br />
+    <%= phone_carriers_collection_select(f) %>
   </p>
   <p>
     <%= f.label :country_code %><br />

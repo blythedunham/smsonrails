@@ -7,7 +7,8 @@ module SmsOnRails
         :retry_count => 3,
         :max_messages => 30,
         :fatal_exception => nil,
-        :locrec_options => {}
+        :locrec_options => {},
+        :failed_delivery_error_message => "Unable to deliver #{self}"
       }
       base.extend ClassMethods
     end
@@ -45,22 +46,26 @@ module SmsOnRails
       # === Options
       # +fatal_exception+ - specify the fatal exception Class to throw. To dismiss all exceptions, set to nil.
       # Defaults to acts_as_deliverable_options specified
+      # +error+ - add an error to the objects base if delivery failed
       def deliver(options={})
-        deliver!
+        deliver!(options)
       rescue Exception => exc
-         fatal_exception = acts_as_deliverable_options.merge(options)[:fatal_exception]
-         raise exc if fatal_exception && exc.is_a?(fatal_exception)
-         false
+        fatal_exception = acts_as_deliverable_options.merge(options)[:fatal_exception]
+        raise exc if fatal_exception && exc.is_a?(fatal_exception)
+        self.errors.add_to_base(options[:error]) if options[:error]
+        false
       end
 
       # Deliver and mark the status fields approriately
-      def deliver!
-        lock_record_and_execute { deliver_message }
+      def deliver!(options={})
+        lock_record_and_execute { deliver_message(options) }
       end
+
+      def delivered?; already_processed?; end
 
       # Deliver message should be overridden by the class to perform any
       # functionality
-      def deliver_message
+      def deliver_message(options={})
         raise(acts_as_deliverable_options[:fatal_exception]||Exception).new "Overwrite deliver_message in base class to perform the actual delivery"
       end
     end

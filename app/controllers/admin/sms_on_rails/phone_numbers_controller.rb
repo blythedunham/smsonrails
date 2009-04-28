@@ -1,4 +1,4 @@
-class Admin::SmsOnRails::PhoneNumbersController < ApplicationController
+class Admin::SmsOnRails::PhoneNumbersController < Admin::SmsOnRails::BaseController
 
   helper SmsOnRails::SmsHelper
 

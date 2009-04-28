@@ -1,5 +1,4 @@
 # Most of this was derived from the clearance gem work
-puts 'insert 1'
 Rails::Generator::Commands::Base.class_eval do
   def file_contains?(relative_destination, line)
     File.read(destination_path(relative_destination)).include?(line)
@@ -20,8 +19,6 @@ Rails::Generator::Commands::Create.class_eval do
 end
 
 Rails::Generator::Commands::Destroy.class_eval do
-
-
   def insert_into(file, line)
     logger.remove "#{line} from #{file}"
     unless options[:pretend]
@@ -31,11 +28,7 @@ Rails::Generator::Commands::Destroy.class_eval do
 end
 
 Rails::Generator::Commands::List.class_eval do
-
-
   def insert_into(file, line)
     logger.insert "#{line} into #{file}"
   end
 end
-
-puts 'asdfinsert'

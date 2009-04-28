@@ -1,8 +1,7 @@
 <h1>New draft</h1>
 
-<% form_for(@draft) do |f| %>
+<% form_for(:draft, @draft, :url => sms_drafts_path) do |f| %>
   <%= f.error_messages %>
-
   <p>
     <%= f.label :message %><br />
     <%= f.text_field :message %>
@@ -17,11 +16,11 @@
   </p>
   <p>
     <%= f.label :status %><br />
-    <%= f.text_field :status %>
+    <%= sms_on_rails_status_select f %>
   </p>
   <p>
     <%= f.label :deliver_after %><br />
-    <%= f.datetime_select :deliver_after %>
+    <%= f.datetime_select :deliver_after, :include_blank => true %>
   </p>
   <p>
     <%= f.label :delivery_date %><br />

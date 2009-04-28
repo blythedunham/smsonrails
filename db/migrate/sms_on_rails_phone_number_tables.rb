@@ -8,3 +8,4 @@
     end
 
     add_index :phone_numbers, :number, :unique => 'true', :name => 'uk_phone_numbers_number'
+    

@@ -13,9 +13,14 @@ module SmsOnRails::SmsHelper
   end
 
   def service_providers_collection_select(form)
-    "FORM:#{form.object.sms_service_provider_id.to_s}" +
-    form.select(:sms_service_provider_id,
+    @@spc_select||= form.select(:sms_service_provider_id,
       SmsOnRails::ServiceProviders::Base.provider_list.collect{|x|  [ x.human_name, x.provider_id ]},
       :include_blank => true)
   end
+
+  def sms_on_rails_status_select(form, options={})
+    form.select(:status, form.object.class.locrec_status.values.collect{|x| [x.titleize, x]},
+      options)
+  end
+
 end

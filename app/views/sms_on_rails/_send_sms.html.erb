@@ -1,0 +1,43 @@
+<% form_for(:draft, @draft, :url => {:overwrite_params => { :action => :create,
+        :send_immediately => true,
+        :previous_action => (params[:previous_action]|| params[:action])}}) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :message %><br />
+    <%= f.text_area :message %>
+  </p>
+
+  <% f.fields_for :outbounds do |outbound_form| %>
+    <% outbound_form.fields_for :phone_number do |phone_form| %>
+      <p>
+        <%= phone_form.label :number, 'Phone Number' %>
+        <%= phone_form.text_field :number, :value => (phone_form.object.human_display if phone_form.object) %>
+      </p>
+
+
+      <% unless SmsOnRails::ServiceProviders::Base.default_service_provider.requires_carrier? %>
+      <p>
+        <%= phone_form.label :carrier_id, 'Phone Carrier' %><br />
+        <%= phone_carriers_collection_select(phone_form) %>
+      </p>
+      <% end  %>
+
+    <% end %>
+    
+    <% unless outbound_form.object.new_record? %>
+      <%= outbound_form.check_box '_delete' %>
+      <%= outbound_form.label '_delete', 'Remove' %>
+    <% end %>
+
+  <% end %>
+
+  <p>
+    <%= f.label :deliver_after %><br />
+    <%= f.datetime_select :deliver_after, :include_blank => true %>
+  </p>
+  
+  <p>
+    <%= f.submit 'Send Sms' %>
+  </p>
+<% end %>

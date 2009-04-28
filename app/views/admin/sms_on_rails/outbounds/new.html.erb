@@ -1,11 +1,10 @@
 <h1>New outbound</h1>
 
-<% form_for(:outbound, @outbound, :url => sms_outbounds_path, :html => {:method => :put }) do |f| %>
+<% form_for(:outbound, @outbound, :url => sms_outbounds_path) do |f| %>
   <%= f.error_messages %>
-
   <p>
     <%= f.label :status %><br />
-    <%= f.text_field :status %>
+    <%= sms_on_rails_status_select(f) %>
   </p>
   <p>
     <%= f.label :notes %><br />
@@ -16,8 +15,8 @@
     <%= f.datetime_select :processed_on %>
   </p>
   <p>
-    <%= f.label :sms_service_provider_id %><br />
-    <%= f.text_field :sms_service_provider_id %>
+    <%= f.label :sms_service_provider_id, 'Sms Service Provider' %><br />
+    <%= service_providers_collection_select(f) %>
   </p>
   <p>
     <%= f.label :created_at %><br />

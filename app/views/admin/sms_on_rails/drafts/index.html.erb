@@ -1,4 +1,4 @@
-<h1>Listing drafts</h1>
+<h1>Listing SMS Drafts</h1>
 
 <table>
   <tr>
@@ -18,8 +18,8 @@
     <td><%=h draft.status %></td>
     <td><%=h draft.deliver_after %></td>
     <td><%=h draft.delivery_date %></td>
-    <td><%= link_to 'Show', sms_draft_path(:id => draft)%></td>
-    <td><%= link_to 'Edit', edit_sms_draft_path(draft) %></td>
+    <td><%= link_to 'Show',    sms_draft_outbounds_path(:sms_draft_id => draft)%></td>
+    <td><%= link_to 'Edit',    edit_sms_draft_path(draft) %></td>
     <td><%= link_to 'Destroy', sms_draft_path(draft), :confirm => 'Are you sure?', :method => :delete %></td>
   </tr>
 <% end %>

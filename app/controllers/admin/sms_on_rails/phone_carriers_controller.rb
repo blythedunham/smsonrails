@@ -1,17 +1,6 @@
-ActionController::Routing::Routes.draw do |map|
-  #Resources for sms on rails admin routes
-  #url: localhost:3000/admin/sms/drafts goes to the app/controllers/admin/sms_on_rails/draft_controller.rb
-  map.resources :sms_drafts,         :as => 'admin/sms/drafts',         :controller => 'admin/sms_on_rails/drafts'  do |draft|
-    draft.resources :outbounds,      :controller => 'admin/sms_on_rails/outbounds'
-  end
-
-  map.resources :sms_phone_numbers,  :as => 'admin/sms/phone_numbers',  :controller => 'admin/sms_on_rails/phone_numbers'
-  map.resources :sms_outbounds,      :as => 'admin/sms/outbounds',      :controller => 'admin/sms_on_rails/outbounds'
-  map.resources :sms_phone_carriers, :as => 'admin/sms/phone_carriers', :controller => 'admin/sms_on_rails/phone_carriers'
-end
-class Admin::SmsOnRails::PhoneCarriersController < ApplicationController
-  # GET /admin/sms_on_rails_phone_carriers
-  # GET /admin/sms_on_rails_phone_carriers.xml
+class Admin::SmsOnRails::PhoneCarriersController < Admin::SmsOnRails::BaseController
+  # GET /admin/sms/phone_carriers
+  # GET /admin/sms/phone_carriers.xml
   def index
     @phone_carriers = SmsOnRails::PhoneCarrier.all
 
@@ -21,8 +10,8 @@ class Admin::SmsOnRails::PhoneCarriersController < ApplicationController
     end
   end
 
-  # GET /admin/sms_on_rails_phone_carriers/1
-  # GET /admin/sms_on_rails_phone_carriers/1.xml
+  # GET /admin/sms/phone_carriers/1
+  # GET /admin/sms/phone_carriers/1.xml
   def show
     @phone_carrier = SmsOnRails::PhoneCarrier.find(params[:id])
 
@@ -32,8 +21,8 @@ class Admin::SmsOnRails::PhoneCarriersController < ApplicationController
     end
   end
 
-  # GET /admin/sms_on_rails_phone_carriers/new
-  # GET /admin/sms_on_rails_phone_carriers/new.xml
+  # GET /admin/sms/phone_carriers/new
+  # GET /admin/sms/phone_carriers/new.xml
   def new
     @phone_carrier = SmsOnRails::PhoneCarrier.new
 
@@ -43,13 +32,13 @@ class Admin::SmsOnRails::PhoneCarriersController < ApplicationController
     end
   end
 
-  # GET /admin/sms_on_rails_phone_carriers/1/edit
+  # GET /admin/sms/phone_carriers/1/edit
   def edit
     @phone_carrier = SmsOnRails::PhoneCarrier.find(params[:id])
   end
 
-  # POST /admin/sms_on_rails_phone_carriers
-  # POST /admin/sms_on_rails_phone_carriers.xml
+  # POST /admin/sms/phone_carriers
+  # POST /admin/sms/phone_carriers.xml
   def create
     @phone_carrier = SmsOnRails::PhoneCarrier.new(params[:phone_carrier])
 
@@ -65,8 +54,8 @@ class Admin::SmsOnRails::PhoneCarriersController < ApplicationController
     end
   end
 
-  # PUT /admin/sms_on_rails_phone_carriers/1
-  # PUT /admin/sms_on_rails_phone_carriers/1.xml
+  # PUT /admin/sms/phone_carriers/1
+  # PUT /admin/sms/phone_carriers/1.xml
   def update
     @phone_carrier = SmsOnRails::PhoneCarrier.find(params[:id])
 
@@ -82,8 +71,8 @@ class Admin::SmsOnRails::PhoneCarriersController < ApplicationController
     end
   end
 
-  # DELETE /admin/sms_on_rails_phone_carriers/1
-  # DELETE /admin/sms_on_rails_phone_carriers/1.xml
+  # DELETE /admin/sms/phone_carriers/1
+  # DELETE /admin/sms/phone_carriers/1.xml
   def destroy
     @phone_carrier = SmsOnRails::PhoneCarrier.find(params[:id])
     @phone_carrier.destroy

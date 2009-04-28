@@ -2,9 +2,9 @@ require File.dirname(__FILE__)+'/abstract_test_support.rb'
 
 SmsOnRails::ServiceProviders::Clickatell.config =
   {
-   :api_id => '3159098',
-   :user_name => 'blythedunham',
-   :password => 'g1raff3'
+   :api_id => 'api',
+   :user_name => 'user',
+   :password => 'pass'
   }
 
 
@@ -22,11 +22,9 @@ class SmsOnRails::ServiceProviders::ClickatellTest < Test::Unit::TestCase
     SmsOnRails::ServiceProviders::Base.default_service_provider = SmsOnRails::ServiceProviders::Dummy
   end
 
-  def test_send_to_bad_number
-
-    sms = SmsOnRails::Outbound.create_sms 'some test message #{Time.now.to_s(:db)}', 'ss'
+  def test_send_to_bad_clickatell_number
     assert_raise(SmsOnRails::SmsError){
-      SmsOnRails::ServiceProviders::Clickatell.instance.send_sms sms
+      SmsOnRails::ServiceProviders::Clickatell.instance.send_message('ss', 'test message', options={})
     }
   end
 

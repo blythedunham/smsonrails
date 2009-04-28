@@ -1,0 +1,29 @@
+
+<p>
+  <b>Message:</b>
+  <%=h @draft.complete_message %>
+</p>
+
+<p>
+  <b>Status:</b>
+  <%=h @draft.status %>
+</p>
+
+<p>
+  <b>Deliver after:</b>
+  <%=h @draft.deliver_after %>
+</p>
+
+<p>
+  <b>Delivery date:</b>
+  <%=h @draft.delivery_date %>
+</p>
+
+<p> 
+  <b> Phone Numbers: </b><br>
+  <% @draft.outbounds.each do |outbound| %>
+    <%= outbound.phone_number.human_display %><br>
+  <% end  %>
+</p>
+
+<%= link_to 'Send More SMS Messages', new_sms_path  %>

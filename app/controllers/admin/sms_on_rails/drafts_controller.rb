@@ -1,6 +1,8 @@
-class Admin::SmsOnRails::DraftsController < ApplicationController
-  # GET /admin/sms_on_rails_drafts
-  # GET /admin/sms_on_rails_drafts.xml
+class Admin::SmsOnRails::DraftsController < Admin::SmsOnRails::BaseController
+  include SmsOnRails::CreationSupport
+
+  # GET /admin/sms/drafts
+  # GET /admin/sms/drafts.xml
   def index
     @drafts = SmsOnRails::Draft.all
 
@@ -10,19 +12,9 @@ class Admin::SmsOnRails::DraftsController < ApplicationController
     end
   end
 
-  # GET /admin/sms_on_rails_drafts/1
-  # GET /admin/sms_on_rails_drafts/1.xml
-  def show
-    @draft = SmsOnRails::Draft.find(params[:id])
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.xml  { render :xml => @draft }
-    end
-  end
-
-  # GET /admin/sms_on_rails_drafts/new
-  # GET /admin/sms_on_rails_drafts/new.xml
+  # GET /admin/sms/drafts/new
+  # GET /admin/sms/drafts/new.xml
   def new
     @draft = SmsOnRails::Draft.new
 
@@ -32,30 +24,17 @@ class Admin::SmsOnRails::DraftsController < ApplicationController
     end
   end
 
-  # GET /admin/sms_on_rails_drafts/1/edit
+  # GET /admin/sms/drafts/1/edit
   def edit
     @draft = SmsOnRails::Draft.find(params[:id])
   end
 
-  # POST /admin/sms_on_rails_drafts
-  # POST /admin/sms_on_rails_drafts.xml
   def create
-    @draft = SmsOnRails::Draft.new(params[:draft])
-
-    respond_to do |format|
-      if @draft.save
-        flash[:notice] = 'Draft was successfully created.'
-        format.html { redirect_to(sms_draft_url(:id => @draft)) }
-        format.xml  { render :xml => @draft, :status => :created, :location => @draft }
-      else
-        format.html { render :action => "new" }
-        format.xml  { render :xml => @draft.errors, :status => :unprocessable_entity }
-      end
-    end
+    create_sms_draft
   end
-
-  # PUT /admin/sms_on_rails_drafts/1
-  # PUT /admin/sms_on_rails_drafts/1.xml
+  
+  # PUT /admin/sms/drafts/1
+  # PUT /admin/sms/drafts/1.xml
   def update
     @draft = SmsOnRails::Draft.find(params[:id])
 
@@ -71,8 +50,8 @@ class Admin::SmsOnRails::DraftsController < ApplicationController
     end
   end
 
-  # DELETE /admin/sms_on_rails_drafts/1
-  # DELETE /admin/sms_on_rails_drafts/1.xml
+  # DELETE /admin/sms/drafts/1
+  # DELETE /admin/sms/drafts/1.xml
   def destroy
     @draft = SmsOnRails::Draft.find(params[:id])
     @draft.destroy
@@ -82,4 +61,15 @@ class Admin::SmsOnRails::DraftsController < ApplicationController
       format.xml  { head :ok }
     end
   end
+
+  protected
+
+  
+  # overwrite to use send_sms if created that or
+  # new for all the params
+  def render_send_sms_template
+    render :action => ((params[:previous_action]||params[:action] == 'send_sms') ? :send_sms : :new)
+  end
+
+
 end

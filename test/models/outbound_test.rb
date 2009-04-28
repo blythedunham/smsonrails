@@ -64,6 +64,11 @@ class SmsOnRails::OutboundTest  < Test::Unit::TestCase
     
   end
   
+  def test_send_to_invalid_number
+    assert_raise(ActiveRecord::RecordInvalid){
+      sms = SmsOnRails::Outbound.create_sms 'some test message #{Time.now.to_s(:db)}', 'ss'
+    }
+  end
 
   protected
 

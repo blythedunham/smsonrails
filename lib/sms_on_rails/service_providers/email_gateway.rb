@@ -10,7 +10,8 @@ module SmsOnRails
 
         def mailer_klass; self.class.mailer_klass; end
 
-     
+        def requires_carrier?; true; end
+        
         protected
 
 

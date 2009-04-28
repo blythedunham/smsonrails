@@ -38,10 +38,13 @@ module SmsOnRails
         self.class.locrec_status
       end
 
+      def already_processed?
+        get_locrec_col(:status) != locrec_status[:not_processed]
+      end
       # Lock the record by setting the status from NOT_PROCESSED TO PROCESSED
       # StalerecordErrors are caught and logged
       def lock_record
-        unless get_locrec_col(:status) == locrec_status[:not_processed]
+        if already_processed?
           raise SmsOnRails::LockableRecord::UnableToLockRecord.new(
             "Record #{self.to_param} appears to be processed. #{locrec_columns[:status]}" +
             "is #{get_locrec_col(:status)} instead of #{locrec_status[:not_processed]}"
@@ -110,7 +113,7 @@ module SmsOnRails
             set_locrec_col :status, current_status
 
             if locrec_columns[:notes]
-              set_locrec_col :notes, "#{current_status}: exc.to_s"
+              set_locrec_col :notes, "#{current_status}: #{exc.to_s}"
             end
             save!
           end
