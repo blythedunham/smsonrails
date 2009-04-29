@@ -11,10 +11,6 @@ module SmsOnRails
         def mailer_klass; self.class.mailer_klass; end
 
         def requires_carrier?; true; end
-        
-        protected
-
-
 
         # Email Gateway Send message
         #
@@ -25,20 +21,18 @@ module SmsOnRails
         # === Params
         # * +phone_number+ - can be one of the following
         #    sms_email_address. Example: '2065551234@txt.att.net'
-        #    phone number string with or without the country code: example: '12065556666'
-        #    array of sms_email_addresses
-        #    array of phone number strings
+        #    array of sms_email_addresses: ['2065551234@txt.att.net', '2065552234@txt.att.net']
         # * +message+ - the text message to send
-        # 
+        #
         # ===Options
-        # * <tt>:carrier</tt> - can be symbol, name, id, or SmsOnRails::PhoneCarrier object
         # * <tt>:sender</tt>  - email address of the sender overrides default
         # * <tt>:bcc</tt>     - email_address or array of email_addresses to blind carbon copy
-
         def send_message(phone_text, message, options={})
           mailer_klass.deliver_sms_through_gateway(phone_text, message, self.class.config.merge(options))
           {}
         end
+
+        protected
 
         #the formate for email is the sms email address
         def format_phone_number(phone_number)
@@ -58,10 +52,8 @@ module SmsOnRails
         def find_or_create_phone_number(phone_text, options={})
           phone = phone_klass.find_by_sms_email_address(phone_text)
           phone ||= super(phone_text, options)
-
-          if options[:carrier]
-            phone.carrier = carrier_klass.carrier_by_value(options[:carrier])
-          end
+          phone.assign_carrier(options[:carrier]) if options[:carrier]
+          phone
         end
 
         class << self

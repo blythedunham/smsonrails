@@ -78,7 +78,7 @@ module SmsOnRails
         end
 
         def assign_phone_number(phone)
-          self.phone_number = SmsOnRails::PhoneNumber.find_or_create_by_phone_number(phone)
+          self.phone_number = SmsOnRails::PhoneNumber.find_and_create_by_number(phone)
         end
 
         def assign_existing_phone; assign_phone_number(self.phone_number); end

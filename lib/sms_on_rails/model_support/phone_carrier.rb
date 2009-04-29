@@ -28,7 +28,7 @@ module SmsOnRails
         # * SmsOnRails::PhoneCarrier instance returns self
         # * the id number
         def carrier_by_value(carrier)
-          phone_carrier = case carrier.type.to_s
+          phone_carrier = case carrier.class.to_s
             when 'Symbol', 'String'   then find_by_name(carrier)
             when "#{self.class.to_s}" then carrier
             when 'Fixnum'             then find_by_id(carrier)
@@ -42,11 +42,13 @@ module SmsOnRails
 
           number = address
           carrier = nil
+
           if address.match(/^\s*(\d+)@(\S+)\s*$/)
             number = match[1]
             carrier_name = match[2]
             carrier = find_by_email_domain(match[2]) if match[2]
           end
+          
           [number, carrier]
         end
       end

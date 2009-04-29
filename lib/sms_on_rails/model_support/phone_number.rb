@@ -83,12 +83,16 @@ module SmsOnRails
 
       # Return the phone number with specified carrier if the phone number is an sms email address
       def find_by_sms_email_address(address, options={})
-        number, carrier = SmsOnRails::PhoneCarrier.carrier_from_sms_email(address)
-        if number && carrier
-          phone = find_by_phone_number(number, options)
-          phone.carrier = carrier
+        number, carrier = reflections[:carrier].klass.carrier_from_sms_email(address)
+
+        if number
+          phone = find_by_number(number, options)||new(:number => number)
+          phone.carrier = carrier if carrier
+          phone
+        else
+          nil
         end
-        phone
+
       end
 
       # The digits (numbers) only of the phone number
@@ -212,8 +216,16 @@ module SmsOnRails
         @digits||=self.class.digits(self.number)
       end
 
+      # return the sms email address from the carrier
       def sms_email_address
         carrier.sms_email_address(self) if carrier
+      end
+      
+      #Assign the carrier to the phone number if it exists
+      #+carrier+ - can be a ActiveRecord object, a name of the carrier, or carrier id
+      def assign_carrier(carrier)
+        specified_carrier = self.class.reflections[:carrier].klass.carrier_by_value(carrier)
+        self.carrier = specified_carrier if specified_carrier
       end
       
       alias_method  :phone_number_digits, :digits

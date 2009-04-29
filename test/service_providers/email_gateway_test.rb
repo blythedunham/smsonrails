@@ -8,10 +8,6 @@ SmsOnRails::ServiceProviders::EmailGateway.config =
    #:mailer_klass => nil,
   }
 
-SmsOnRails::ServiceProviders::EmailGatewaySupport::SmsMailer.smtp_settings =
-  {
-
-  }
 
 ActionMailer::Base.delivery_method = :test
 
@@ -19,11 +15,17 @@ class SmsOnRails::ServiceProviders::EmailGatewayTest < Test::Unit::TestCase
 
   include SmsOnRails::ServiceProviders::AbstractTestSupport
 
+
+
+  
   protected
 
   def default_options
     {:phone_number => {:carrier_id => 1}}
   end
-  
+
+  def gateway
+    SmsOnRails::ServiceProviders::EmailGateway.instance
+  end
 
 end

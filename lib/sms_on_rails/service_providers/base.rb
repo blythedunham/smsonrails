@@ -56,7 +56,6 @@ module SmsOnRails
         raise SmsOnRails::SmsError.new("Override send_message in subclass #{self.class}")
       end
 
-
       
       # Sends a message to a phone number active record object or string
       # and performs validation on the phone_number
@@ -72,11 +71,11 @@ module SmsOnRails
 
         if options[:skip_validation]
           phone_text = phone_obj.is_a?(ActiveRecord::Base) ? format_phone_number(phone_number) : phone_obj
-          return send_message(phone_obj, message, options)
+          return send_message(phone_text, message, options)
         end
 
         phone_number = phone_obj.is_a?(ActiveRecord::Base) ? phone_obj :
-                       find_or_create_phone_number(phone_number)
+                       find_or_create_phone_number(phone_obj, options)
 
         assert_message_options!(phone_number, message, options)
         send_message(format_phone_number(phone_number), message, options)
@@ -106,20 +105,20 @@ module SmsOnRails
       # and this phone number is not on the list
       def check_white_list!(phone_number)
         if self.class.config[:white_list] && !phone_number.white_list?
-          raise SmsOnRails::SmsError.new("Phone number #{phone_number} is not in white list")
+          raise SmsOnRails::SmsError.new("Phone number #{phone_number.human_display} is not in white list")
         end
       end
 
       # Raise an exception if this phone_number is marked as do not send
       def check_do_not_send!(phone_number)
         if phone_number.do_not_send?
-          raise SmsOnRails::SmsError.new("Phone number #{phone_number} do not send is set:#{phone_number.do_not_send}")
+          raise SmsOnRails::SmsError.new("Phone number #{phone_number.human_display} do not send is set:#{phone_number.do_not_send}")
         end
       end
 
       # Raise exception if invalid data is entered
       def assert_message_options!(phone_number, message, options)
-        raise SmsOnRails::SmsError.new("Invalid or undefined phone number: #{phone_number}") unless phone_number && phone_number.valid?
+        raise SmsOnRails::SmsError.new("Invalid or undefined phone number: #{phone_number.human_display}") unless phone_number && phone_number.valid?
         raise SmsOnRails::SmsError.new("No message specified") unless message
         raise SmsOnRails::SmsError.new("Message is too long. #{message}") if message.length > self.class.max_characters
         check_white_list!(phone_number)
