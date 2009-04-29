@@ -8,7 +8,7 @@ module SmsOnRails
         :max_messages => 30,
         :fatal_exception => nil,
         :locrec_options => {},
-        :failed_delivery_error_message => "Unable to deliver #{self}"
+        :error => "Unable to deliver"
       }
       base.extend ClassMethods
     end
@@ -52,7 +52,7 @@ module SmsOnRails
       rescue Exception => exc
         fatal_exception = acts_as_deliverable_options.merge(options)[:fatal_exception]
         raise exc if fatal_exception && exc.is_a?(fatal_exception)
-        self.errors.add_to_base(options[:error]) if options[:error]
+        self.errors.add_to_base(options[:error]||acts_as_deliverable_options[:error])
         false
       end
 

@@ -9,7 +9,8 @@ module SmsOnRails
 
         base.has_a_sms_service_provider
 
-        base.acts_as_deliverable :fatal_exception => SmsOnRails::FatalSmsError
+        base.acts_as_deliverable :fatal_exception => SmsOnRails::FatalSmsError,
+                                 :error => 'Unable to send message.'
 
 
         base.acts_as_substitutable :draft_message,
@@ -23,6 +24,8 @@ module SmsOnRails
 
         base.send :accepts_nested_attributes_for, :phone_number
 
+        base.validates_associated :phone_number
+                
         base.send :include, InstanceMethods
         base.send :extend,  ClassMethods
       end
@@ -32,27 +35,33 @@ module SmsOnRails
           create_sms(message, phone_number, options.merge(:send_immediately => true))
         end
 
+        def send_immediately!(message, phone_number, options={})
+          create_sms!(message, phone_number, options.merge(:send_immediately => true))
+        end
+
         def create_sms(message, number, options={})
-          draft = message.is_a?(String) ?
-            reflections[:draft].klass.new((options[:draft]||{}).merge(:message => message)) :
-            message
+          draft = reflections[:draft].klass.create_sms(message, number, options)
+          number.is_a?(Array) ? draft.outbounds : draft.outbounds.first
+        end
 
-          draft.save! if draft.new_record?
+        def create_sms!(message, number, options={})
+          draft = reflections[:draft].klass.create_sms!(message, number, options)
+          number.is_a?(Array) ? draft.outbounds : draft.outbounds.first
+        end
 
-          smses = reflections[:phone_number].klass.find_all_by_numbers(number, :create => true).inject([]) do |smses, phone|
-            phone.update_attributes(options[:phone_number]) if options[:phone_number]
+        def create_outbounds_for_phone_numbers(phone_numbers, options={})
+          smses = reflections[:phone_number].klass.find_and_create_all_by_numbers(phone_numbers, (options[:find]||{}).reverse_merge(:create => :new)).inject([]) do |smses, phone|
+            phone.attributes = options[:phone_number] if options[:phone_number]
             sms = self.new(options[:sms]||{})
             sms.phone_number = phone
-            sms.draft = draft
             sms.service_provider = options[:service_provider] if options[:service_provider]
             smses << sms
-            sms.save!
-            sms.deliver! if options[:send_immediately]
             smses
           end
-
-          number.is_a?(Array) ? smses : smses.first
+          smses
         end
+
+
       end #ClassMethods
 
       module InstanceMethods

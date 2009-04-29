@@ -4,21 +4,39 @@ require File.dirname(__FILE__)+'/../test_helper'
 
 class SmsOnRails::Outbound < ActiveRecord::Base
   def deliver_message_with_exception(options={})
-    raise Exception.new 'asdf'
+    raise Exception.new('asdf')
   end
 end
 
 class SmsOnRails::DeliveryAndLockingTest  < Test::Unit::TestCase
 
-  def test_outbound_bad_number
+  def test_failed_delivery_with_exception
     SmsOnRails::Outbound.send :alias_method_chain, :deliver_message, :exception
     SmsOnRails::Outbound.delete_all
 
     sms = nil
     assert_raises(Exception) {
-      sms = SmsOnRails::Outbound.send_immediately 'hi', '2065552476'
+      sms = SmsOnRails::Outbound.send_immediately! 'hi', '2065552476'
     }
+    
+    sms = SmsOnRails::Outbound.find :first
+    assert(sms)
 
+    assert_equal('FAILED', sms.status)
+    #assert(sms.processed_on.to_i <= Time.now.to_i)
+  ensure
+    SmsOnRails::Outbound.send :alias_method, :deliver_message, :deliver_message_without_exception
+  end
+
+
+  def test_failed_delivery_with_errors
+    SmsOnRails::Outbound.send :alias_method_chain, :deliver_message, :exception
+    SmsOnRails::Outbound.delete_all
+
+    sms = SmsOnRails::Outbound.send_immediately 'hi', '2065552476'
+    assert(sms.errors.any?, "Expecting deliver errors.")
+
+    assert_equal(sms.errors.on(:base), 'Unable to send message.')
     sms = SmsOnRails::Outbound.find :first
     assert(sms)
 

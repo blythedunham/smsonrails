@@ -1,11 +1,5 @@
 require File.dirname(__FILE__)+'/abstract_test_support.rb'
-
-SmsOnRails::ServiceProviders::Clickatell.config =
-  {
-   :api_id => 'api',
-   :user_name => 'user',
-   :password => 'pass'
-  }
+require File.dirname(__FILE__)+'/test_password.rb'
 
 
 

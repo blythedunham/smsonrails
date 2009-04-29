@@ -8,49 +8,78 @@ module SmsOnRails
         base.before_save {|record| record.number = record.digits}
         base.send :validates_presence_of, :number
 
+        base.class_inheritable_accessor :valid_finder_create_options
+        base.valid_finder_create_options = %w(create keep_duplicates skip_sort)
       end
+
     end
 
     module ClassMethods
-      def find_all_by_numbers(numbers, options={})
 
-        creation_method = options.delete(:create)
-        creation_method = :create if creation_method.is_a?(TrueClass)
+      # adds a sanitize search for numbers for the options
+      # used for finders
+      # Use with find for other ActiveRecord objects
+      #   Outbound.find :all, add_number_search([1,2,3], :conditions => 'outbounds.send_priority == 1')
+      def add_number_search(numbers, options={}, merge_options={})
+        number_digits = [numbers].flatten
+        number_digits.collect!{|n| digits(n) } unless merge_options[:skip_sanitize]
+        number_conditions = ['number in (?)', number_digits.uniq.compact]
+        options[:conditions] = merge_conditions(options[:conditions]||{}, number_conditions)
+        options
+      end
 
-        numbers = [numbers].flatten
-        return numbers if numbers.first.is_a?(ActiveRecord::Base)
+      # Find all numbers (sanitized) that match a list of String +numbers+
+      def find_all_by_numbers(numbers, options={}, merge_options={})
+        find(:all, add_number_search(numbers, options, merge_options))
+      end
 
-        found_numbers = find(:all, :conditions => ['number in (?)', numbers.collect!{|n| digits(n) }.uniq.compact])
-        if creation_method
-          new_numbers = (numbers - found_numbers.collect(&:digits))
-          new_numbers.collect! { |n| send(creation_method, :number => n) }
-          found_numbers.concat(new_numbers)
+      # Find a single number
+      def find_by_number(number, options={})
+        find_all_by_numbers(number, options).first;
+      end
+
+
+
+      # Find all numbers and create if it doesn't already exist
+      # +number_list+ - a list of numbers (String, ActiveRecord or attribute hash)
+      # +options+ - additional create options and normal finder options like <tt>:conditions</tt>
+      # === Additional Options
+      # <tt>:create</tt> - <tt>:new</tt>(Default), <tt>:create</tt>, or <tt>:create!</tt>
+      # If the number does not exist, create it with this method. Using <tt>:new</tt> means none of the objects are saved
+      # <tt>:keep_duplicates<tt> - When set to true, duplicates in the list are returned
+      # <tt>:skip_sort</tt> - Default is to sort the list to be in the same order as +number_list+.
+      # Set to false to skip sorting (perf boost). Instance creation or attribute update does not occur
+      # when <tt>skip_sort</tt> is false.
+      def find_and_create_all_by_numbers(number_list, options={})
+        create_options, finder_options = seperate_find_and_create_options(options)
+
+        # Collect a list of digits and a list of attributes
+        attribute_list = []
+        number_digits = [number_list].flatten.inject([]) do |list, n|
+          attribute_list << (new_attributes = value_to_hash(n))
+          digit = digits(new_attributes[:number]||new_attributes['number'])
+          digit = new_attributes[:number]||new_attributes['number'] if digit.blank?
+          list << digit
+          list
         end
-        found_numbers
-      end
 
-      def find_by_phone_number(number, options={})
-        find_all_by_numbers(number, options).first
-      end
-
-      def find_or_create_by_phone_number(digits)
-        attributes = if digits.is_a?(ActiveRecord::Base)
-          digits.new_record? ? digits.attributes : nil
-        elsif digits.is_a?(Hash)
-          digits.dup
-        elseif !digits.nil?
-          {:number => digits}
+        found_numbers = find_all_by_numbers(number_digits, finder_options, :skip_sanitize => true)
+        # sort the list based on the order of the original input
+        # not found values have nil
+        if create_options[:skip_sort]
+          found_numbers
+        else
+          sorted_numbers = sort_by_numbers(found_numbers, number_digits, create_options)
+          transaction { update_attributes_on_list(sorted_numbers, attribute_list, create_options) }
         end
-
-        return digits unless attributes
-
-        attributes.stringify_keys!
-
-        number = attributes.delete('number')
-        phone = (find_by_number(number) if number)||new(:number => number)
-        phone.attributes = attributes
-        phone
       end
+
+      # Find a number and create if it does not exist
+      # +options+ include those specified in find_all_and_create_by_number
+      def find_and_create_by_number(number, options={})
+        find_and_create_all_by_numbers(number, options.reverse_merge(:create => :new)).first
+      end
+
 
       # Return the phone number with specified carrier if the phone number is an sms email address
       def find_by_sms_email_address(address, options={})
@@ -69,6 +98,7 @@ module SmsOnRails
       #  SmsOnRails::digits(206.555.5555')
       #  SmsOnRails::digits(1206-555  5555')
       def digits(text)
+        return text.digits if text.is_a?(self)
         number = text.to_s.gsub(/\D/,'')
         number = "1#{number}" if number.length == 10
         number
@@ -86,6 +116,84 @@ module SmsOnRails
           nil
         end
       end
+
+      protected
+            # Return create_options hash and finder options hash from all options
+      def seperate_find_and_create_options(options={})#:nodoc:
+
+        seperated_options = (options||{}).inject([{}, {}]) {|map, (k,v)|
+          if valid_finder_create_options.include?(k.to_s)
+            map.first[k.to_sym] = v
+          else
+            map.last[k.to_sym]  = v
+          end
+          map
+        }
+        seperated_options.first[:create] = :new if seperated_options.first[:create].is_a?(TrueClass)
+        seperated_options
+      end
+
+     # Convert a PhoneNumber, hash map or string number
+      # into an attribute hash
+      def value_to_hash(digits)#:nodoc:
+        attributes = if digits.is_a?(ActiveRecord::Base)
+          digits.attributes
+        elsif digits.is_a?(Hash)
+          digits.dup
+        elsif digits
+          {:number => digits}
+        end
+        attributes
+      end
+
+            # Return a sorted list of PhoneNumber instances
+      # Will create new records for missing records if attribute_list is specified
+      # +unsorted_list+ - unsorted list of PhoneNumbers
+      # +sorted_digits+ - sorted list of digits (Strings)
+      # +attribute_list+ - optional list of attributes in sorted order
+      # +creation_method+ - :create, :new, or :create!
+      def sort_by_numbers(unsorted_list, sorted_digits, options={})
+
+        unsorted_map = unsorted_list.inject({}) {|map, v| map[v.number] = v; map }
+
+        # First sort the list in the order of the sorted digits
+        # leaving nils for empty spaces
+        sorted_list = if sorted_digits.length > 1
+          sorted = [nil] * sorted_digits.length
+          sorted_digits.each_with_index{|n, idx|
+            sorted[idx] = unsorted_map[n]
+            unsorted_map[n] = :used unless options[:keep_duplicates]
+          }
+          
+          sorted.delete_if{|x| x == :used } unless options[:keep_duplicates]
+          sorted
+        else
+          unsorted_list.any? ?  unsorted_list.dup : [nil]
+        end
+        sorted_list
+      end
+
+      # create new records for any records not found
+      # update the attributes of the found records
+      # save if :create
+      def update_attributes_on_list(sorted_list, attribute_list, options={})
+      
+        unless attribute_list.blank?
+          0.upto(sorted_list.length - 1) {|idx|
+            if sorted_list[idx]
+              if (attr = attribute_list[idx].delete_if{|x, y| x.to_s == 'number'}).any?
+                sorted_list[idx].attributes = attr
+                sorted_list[idx].save  if options[:create]
+                sorted_list[idx].save! if options[:create!]
+              end
+            elsif options[:create]
+              sorted_list[idx] = self.send(options[:create], attribute_list[idx])
+            end
+          }
+        end
+        sorted_list
+      end
+
     end
 
     module InstanceMethods

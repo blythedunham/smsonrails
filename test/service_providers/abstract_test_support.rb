@@ -18,9 +18,9 @@ module SmsOnRails::ServiceProviders::AbstractTestSupport
   def test_send_sms_off_white_list
     original_config = provider_klass.config.dup
     provider_klass.config[:white_list] = true
-    
 
-    phone = SmsOnRails::PhoneNumber.find_by_phone_number test_phone_number, :create => true
+    phone = SmsOnRails::PhoneNumber.find_and_create_by_number test_phone_number, :create => :create
+    
     phone.white_list = false
     phone.save!
     
@@ -37,15 +37,15 @@ module SmsOnRails::ServiceProviders::AbstractTestSupport
 
   def test_do_not_send_errors_out
 
-    phone = SmsOnRails::PhoneNumber.find_by_phone_number test_phone_number, :create => true
+    phone = SmsOnRails::PhoneNumber.find_and_create_by_number test_phone_number, :create => true
     phone.do_not_send = 'bounce'
     phone.save!
 
-   assert_raise(SmsOnRails::SmsError){
-     sms = SmsOnRails::Outbound.create_sms "some test message #{Time.now.to_s(:db)}", test_phone_number, default_options
-     result = provider_klass.instance.send_sms sms
-     assert(result.is_a?(Hash))
-   }
+    assert_raise(SmsOnRails::SmsError){
+      sms = SmsOnRails::Outbound.create_sms "some test message #{Time.now.to_s(:db)}", test_phone_number, default_options
+      result = provider_klass.instance.send_sms sms
+      assert(result.is_a?(Hash))
+    }
 
   ensure
     phone.destroy
