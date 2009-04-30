@@ -4,14 +4,13 @@ module SmsOnRails
       def self.included(base)
         base.send :include,InstanceMethods
         base.send :extend, ClassMethods
-        base.send :validates_format_of, :phone_number_digits, :with => /^\d{5,30}$/, :message => 'must be number and have at least 5 digits'
+        base.send :validates_format_of, :phone_number_digits, :with => /^\d{5,30}$/, :message => 'must be a number and have at least 5 digits'
         base.before_save {|record| record.number = record.digits}
         base.send :validates_presence_of, :number
-
+        base.send :attr_reader, :original_number
         base.class_inheritable_accessor :valid_finder_create_options
         base.valid_finder_create_options = %w(create keep_duplicates skip_sort)
       end
-
     end
 
     module ClassMethods
@@ -30,6 +29,7 @@ module SmsOnRails
 
       # Find all numbers (sanitized) that match a list of String +numbers+
       def find_all_by_numbers(numbers, options={}, merge_options={})
+        return [] unless numbers.dup.delete_if{|x| x.blank? }.any?
         find(:all, add_number_search(numbers, options, merge_options))
       end
 
@@ -208,8 +208,14 @@ module SmsOnRails
       end
 
       def number=(value)
+        @original_number = value unless value.blank?
         @digits = self.class.digits(value)
         write_attribute :number, @digits
+      end
+
+      def number
+        n = read_attribute :number
+        n.blank? ? original_number : n
       end
 
       def digits
@@ -220,7 +226,7 @@ module SmsOnRails
       def sms_email_address
         carrier.sms_email_address(self) if carrier
       end
-      
+
       #Assign the carrier to the phone number if it exists
       #+carrier+ - can be a ActiveRecord object, a name of the carrier, or carrier id
       def assign_carrier(carrier)

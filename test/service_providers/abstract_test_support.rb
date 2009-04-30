@@ -2,8 +2,7 @@ require File.dirname(__FILE__)+'/../test_helper'
 
 module SmsOnRails::ServiceProviders::AbstractTestSupport
   mattr_accessor :test_phone_number
-  self.test_phone_number ||= '12063512476'
-
+  self.test_phone_number ||= '12065552476'
 
   def test_ping
     assert provider_klass.instance.ping
@@ -12,6 +11,7 @@ module SmsOnRails::ServiceProviders::AbstractTestSupport
   def test_send_sms
     sms = SmsOnRails::Outbound.create_sms "some test message #{Time.now.to_s(:db)}", test_phone_number, default_options
     result = provider_klass.instance.send_sms sms
+    assert test_phone_number, sms.phone_number.number
     assert(result.is_a?(Hash))
   end
 
@@ -56,7 +56,6 @@ module SmsOnRails::ServiceProviders::AbstractTestSupport
   ensure
     phone.destroy
   end
-
 
   def test_send_message
     map = provider_instance.send_message('12065555555@txt.att.net', "SEND MESSAGE")

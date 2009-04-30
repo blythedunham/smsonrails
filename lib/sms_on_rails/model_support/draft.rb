@@ -43,7 +43,13 @@ module SmsOnRails
         def create_sms(message, phone_numbers=nil, options={})
           draft = create_draft(message)
           draft.attributes = options[:draft] if options[:draft]
+          
+          # Update draft with any existing phone numbers
+          draft.outbounds.each {|o| o.assign_existing_phone } if draft.outbounds
+
+          # Generate new phone_numbers
           draft.create_outbounds_for_phone_numbers(phone_numbers, options) if phone_numbers
+          
           if draft.send(options[:bang] ? :save! : :save) && options[:send_immediately]
             draft.send(options[:bang] ? :deliver! : :deliver)
           end
@@ -58,7 +64,7 @@ module SmsOnRails
         # +options+ - A Draft object, a hash of attributes(can be nested) or a String with the draft message
         def create_draft(options={})
           if options.is_a?(ActiveRecord::Base)
-            options
+            options.dup
           elsif options.is_a?(Hash)
             new(options)
           elsif options.is_a?(String)

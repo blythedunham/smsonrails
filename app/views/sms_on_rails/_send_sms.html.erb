@@ -16,7 +16,7 @@
       </p>
 
 
-      <% unless SmsOnRails::ServiceProviders::Base.default_service_provider.requires_carrier? %>
+      <% if SmsOnRails::ServiceProviders::Base.default_service_provider.requires_carrier? %>
       <p>
         <%= phone_form.label :carrier_id, 'Phone Carrier' %><br />
         <%= phone_carriers_collection_select(phone_form) %>

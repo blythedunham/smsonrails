@@ -82,6 +82,13 @@ class SmsOnRails::OutboundTest < Test::Unit::TestCase
 
 
 
+  def test_sms_carrier_email
+    phone = SmsOnRails::PhoneNumber.create!(:carrier_id => 1, :number => '12065557777')
+    assert_equal('12065557777', phone.number)
+    assert_equal('2065557777@vtext.com', phone.sms_email_address)
+  end
+
+
   def test_find_and_create_all_by_numbers_with_duplicates
     SmsOnRails::PhoneNumber.delete_all
     test_phone_number_saves_digits

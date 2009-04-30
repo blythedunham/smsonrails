@@ -62,7 +62,7 @@ module SmsOnRails
         #  att_carrier.sms_email_address('12065551111') => '2065551111@att.txt.net'
         #
         def sms_email_address(phone, options={})
-          email = phone.is_a?(ActiveRecord::Base) ? phone.digits : phone.dup
+          email = (phone.is_a?(ActiveRecord::Base) ? phone.digits : phone).dup
           email.gsub!(/^1/, '')
           email << '@'
           email << self.email_domain

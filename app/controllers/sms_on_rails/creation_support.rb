@@ -38,26 +38,21 @@ module SmsOnRails::CreationSupport
   # POST /admin/sms/drafts.xml
   def create_sms_draft
 
-    @draft = SmsOnRails::Draft.new(params[:draft])
+    @draft = SmsOnRails::Draft.create_sms(params[:draft], nil, :send_immediately => params[:send_immediately])
+
+    #@draft = SmsOnRails::Draft.new(params[:draft])
 
     # For each outbound created, find and use the existing phone number
     # if it exists
-    @draft.outbounds.each {|o| o.assign_existing_phone }
+    #@draft.outbounds.each {|o| o.assign_existing_phone }
 
     respond_to do |format|
-      if @draft.save
-        if params[:send_immediately]
-          @draft.deliver(:error => "Unable to deliver sms", :save => true)
-          flash[:notice] = 'Draft was successfully created and sent.'
-        else
-          flash[:notice] = 'Draft was created.'
-        end
-      end
-
       unless @draft.errors.any?
+        flash[:notice] = 'Draft was successfully created and sent.'
         format.html { render_sms_creation_success }
         format.xml  { render :xml => @draft, :status => :created, :location => @draft }
       else
+        sanitize_draft_errors(@draft)
         format.html { render_send_sms_template }
         format.xml  { render :xml => @draft.errors, :status => :unprocessable_entity }
       end
@@ -75,6 +70,21 @@ module SmsOnRails::CreationSupport
 
   def render_sms_creation_success
     redirect_to(:overwrite_params => {:id => @draft, :action => :show } )
+  end
+
+  # Clean up the error messages on drafts a little
+  def sanitize_draft_errors(draft)
+    if draft.errors.any?
+      errors = draft.errors.dup
+      draft.errors.clear
+      errors.each{|attr, message|
+        if attr == 'outbounds_phone_number_phone_number_digits'
+          draft.errors.add(:outbounds_phone_number, message)
+        elsif !(attr =~ /^outbounds_phone_number/) && !(attr == 'outbounds' && message == 'is invalid')
+          draft.errors.add(attr, message)
+        end
+      }
+    end
   end
 
 
