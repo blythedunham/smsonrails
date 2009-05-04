@@ -6,8 +6,11 @@ require File.dirname(__FILE__) + '/commands/timestamps.rb'
 class SmsOnRailsGenerator < Rails::Generator::NamedBase
 
   default_options  :skip_models => false,         :skip_carriers => false,
-                   :skip_phone_numbers => false,  :skip_migration => false
+                   :skip_phone_numbers => false,  :skip_migration => false,
+                   :default_service_provider => :email_gateway
 
+  SERVICE_PROVIDERS = [:clickatell, :email_gateway]
+  
   def manifest
     @actions = (actions.blank?) ? %w(environment migration phone_collision) : self.actions
     @actions.sort! #we want environment to run first
@@ -18,7 +21,7 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
          case(action)
            when 'views'           then create_views(m)
            when 'models'          then copy_models(m)
-           when 'environment'     then add_configuation_options
+           when 'environment'     then add_configuation_options(m)
            when 'dependencies'    then add_dependencies
            when 'migration'       then generate_migration_templates(m)
            when 'phone_collision' then handle_phone_number_collision(m)
@@ -49,6 +52,9 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
     opt.on("-p", "--skip-phone_numbers",
            "Skip the phone numbers migrations",
            "Default: false") { |v| options[:skip_phone_numbers] = v }
+    opt.on("-s", "--default_service_provider=[name]",
+           "Name of the default service provider: clickatell or email_gateway",
+           "Default: email_gateway") { |v| options[:default_service_provider] = v }
   end
 
   # If app/models/phone_number.rb exists, add include the Sms functionality
@@ -80,7 +86,6 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
     logger.log message.first, message.last if message
     logger.quiet = true
     Rails::TemplateRunner.new(File.join(File.dirname(__FILE__),'runners', template_name + '.rb'), @destination_root)
-
   ensure
     logger.quiet = options[:quiet]
   end
@@ -105,6 +110,7 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
   #generate the specified migration template
   def generate_migration_template(m, migration_name, options={})
     return if options[:skip_migration]
+
     migration_file_name =  options[:migration_file_name]||"sms_on_rails_create_#{migration_name}s"
     template_file_name  = (options[:migration_file_name]||'schema_migration') +'.rb'
 
@@ -115,12 +121,53 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
 
   end
 
-  def add_configuation_options
+  def add_configuation_options(m)
     add_require_all_models unless supports_engines?
     add_dependencies
-    run_template 'environment', ['updating', 'config/environment.rb with sms configuration']
+
+    logger.update "configuration options in environment.rb"
+    disable_logger do
+      add_service_provider_configuration(m)
+      add_default_service_provider(m)
+    end
   end
 
+  protected
+
+  def disable_logger(&block)
+   logger.quiet = true
+   yield
+  ensure
+    logger.quiet = options[:quiet]
+  end
+
+  def add_service_provider_configuration(m)
+    SERVICE_PROVIDERS.each do |sp_name|
+
+      config_file = File.dirname(__FILE__) + "/templates/configuration/#{sp_name}.rb"
+      if File.exists?(config_file)
+        m.insert_into 'config/environment.rb', File.read(config_file),
+          :margin => 0, :append => true, :quiet => true,
+          :match => "SmsOnRails::ServiceProviders::#{sp_name.to_s.classify}.config"
+      end
+    end
+  end
+
+    def add_default_service_provider(m)
+    line =<<-EOD
+#Uncomment out your default SMS sender
+#{service_provider_line :clickatell}
+#{service_provider_line :email_gateway}
+EOD
+    m.insert_into "config/environment.rb", line, :margin => 0, :append => true, :quiet => true
+  end
+
+  def service_provider_line(sp_name)
+    line = options[:default_service_provider].to_s == sp_name.to_s ? '' : '#'
+    line << "SmsOnRails::ServiceProviders::Base.default_service_provider = SmsOnRails::ServiceProviders::#{sp_name.to_s.classify}.instance"
+    line
+  end
+  
   ##############################################################################
   # Pre Rails engine support: copy to app directly
   ##############################################################################
