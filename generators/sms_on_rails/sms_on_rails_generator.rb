@@ -90,7 +90,6 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
     logger.quiet = options[:quiet]
   end
 
-
   # generate the 3 sms on rails migrations by creating them in the main app dir
   def generate_migration_templates(m)
     generate_migration_template(m, :carrier)                          unless options[:skip_carriers]
