@@ -52,7 +52,7 @@ If you hate it, send me a better stylesheet! */
   width:100%;
 }
 .smsOnRailsHtml th.short {
-	width:20%;
+  width:2px;
 }
 
 .smsOnRailsHtml th {
@@ -61,7 +61,7 @@ If you hate it, send me a better stylesheet! */
   text-align: left;
   color: black;
   padding-right: 20px;
-  width:100px;
+  width:20%;
 }
 
 .smsOnRailsHtml tr.odd {
