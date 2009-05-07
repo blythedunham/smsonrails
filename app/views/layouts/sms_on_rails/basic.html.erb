@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- SMS On Rails is brought to you by snowgiraffe under the MIT License
+Sms On Rails is martiniware. Buy yourself a martini if you like this software. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+  <title>
+    <%  if controller.class.name =~ /^Admin/ %>
+      Sms On Rails Admin
+    <% else %>
+      Sms
+    <% end %>
+   </title>
+  <%= stylesheet_link_tag 'sms_on_rails' %>
+</head>
+<body>
+  <div class="smsOnRailsHtml">
+    <p class="smsFlashNotice"><%= flash[:notice] %></p>
+    <%= yield %>
+  </div>
+</body>
+</html>

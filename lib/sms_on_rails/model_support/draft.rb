@@ -33,6 +33,8 @@ module SmsOnRails
         # <tt>:draft</tt> - a hash of attributes for the draft object
         # <tt>:phone_number</tt> - a hash of attributes applied to all +phone_numbers+
         # <tt>:outbound</tt> - a hash of attributes applied to all generated +Outbound+ instances
+        # <tt>:keep_failed_outbounds</tt> - typically outbound messages are destroyed if they fail during delivery
+        # <tt>:deliver</tt> - options to pass to the deliver method if <tt>:send_immediately</tt> is used
         #
         # ===Example
         # SmsOnRails::Draft.create_sms('my_message', '9995556667')
@@ -41,6 +43,7 @@ module SmsOnRails
         # SmsOnRails::Draft.create_sms(params[:draft]) # assume nested with :outbound_attributes
         # SmsOnRails::Draft.create_sms(params[:draft], params[:phone_numbers], :send_immediately => true
         def create_sms(message, phone_numbers=nil, options={})
+
           draft = create_draft(message)
           draft.attributes = options[:draft] if options[:draft]
           
@@ -51,7 +54,18 @@ module SmsOnRails
           draft.create_outbounds_for_phone_numbers(phone_numbers, options) if phone_numbers
           
           if draft.send(options[:bang] ? :save! : :save) && options[:send_immediately]
-            draft.send(options[:bang] ? :deliver! : :deliver)
+            if !draft.send(options[:bang] ? :deliver! : :deliver, options[:deliver])
+              # this is really crappy but when we are sending multiple messages
+              # locking has to actually create the object.
+              # so if we fail try to delete
+              # this could be terribly slow if there are a lot of outbounds
+              if options[:keep_failed_outbounds]
+                draft.outbounds.each{|o| o.update_attribute(:sms_draft_id, nil ) }
+              else
+                draft.outbounds.each{|o| o.destroy }
+                draft.outbounds = []
+              end
+            end
           end
           draft
         end
@@ -100,6 +114,7 @@ module SmsOnRails
           self.footer ||= self.class.default_footer
         end
 
+        # The complete message with header and footer
         def complete_message
           complete_message = ""
           complete_message << "#{header}\n" unless header.blank?
@@ -116,32 +131,39 @@ module SmsOnRails
         # but the draft object itself is not locked down,
         # so it can be processed by multiple threads
         def deliver(options={})
+          options||={}
           deliver_method = options.delete(:bang) ? :deliver! : :deliver
 
-          success = outbounds.inject(true) do |delivered, o|
-            next(delivered) if o.delivered?
+          error_messages = outbounds.inject([]) do |error_messages, o|
+            next(error_messages) if o.delivered?
             unless o.send(deliver_method, options)
-             self.errors.add_to_base("Message could not be delivered to: #{o.phone_number.human_display}") if options[:error]
-             delivered = false
+             error_messages << "Message could not be delivered to: #{o.phone_number.human_display}"
             end
-            delivered
+            error_messages
           end
-          self.update_attribute(:status, success ?  'PROCESSED' : 'FAILED')
-          success
+     
+          self.update_attribute(:status, error_messages.blank? ?  'PROCESSED' : 'FAILED')
+          error_messages.each { |msg| errors.add_to_base(msg) }
+          error_messages.blank?
         end
 
+        # Deliver all outbound messages safely using optimisitic locking
+        # Progates any exception thrown
         def deliver!(options={})
-          deliver(options.merge(:bang => true))
+          deliver((options||{}).merge(:bang => true))
         end
-
-
-
+        
         # Create Outbound Instances based on +phone_numbers+ and +options+
         # Refer to SmsOnRails::ModelSupport::Outbound.create_outbounds_from_phone
         def create_outbounds_for_phone_numbers(phone_numbers, options={})
           self.outbounds = self.class.reflections[:outbounds].klass.create_outbounds_for_phone_numbers(phone_numbers, options)
         end
-
+        
+        # if there is only one outbound message, return the actual (substituted)
+        # message. Otherwise, returns the draft message with substituted strings if any
+        def actual_message
+          self.outbounds.length == 1 ? outbounds.first.actual_message : message
+        end
 
         protected
 

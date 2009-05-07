@@ -1,7 +1,15 @@
 <h1>New outbound</h1>
 
-<% form_for(:outbound, @outbound, :url => sms_outbounds_path) do |f| %>
+<% form_for(:outbound, @outbound, :url => sms_draft_outbounds_path(@outbound.draft)) do |f| %>
   <%= f.error_messages %>
+  <% @outbound.phone_number ||= SmsOnRails::PhoneNumber.new-%>
+  <% f.fields_for :phone_number do |phone_form| %>
+    <p>
+      <%= f.label :phone_number %><br />
+      <%= phone_form.text_field :number%>
+    </p>
+      <%=  render :partial => '/sms_on_rails/phone_carrier_form_item', :locals => {:phone_form => phone_form } %>
+  <% end %>
   <p>
     <%= f.label :status %><br />
     <%= sms_on_rails_status_select(f) %>
@@ -43,4 +51,4 @@
   </p>
 <% end %>
 
-<%= link_to 'Back', sms_outbounds_path %>
+<%= link_to 'Back', sms_draft_outbounds_path(@outbound.draft) %>

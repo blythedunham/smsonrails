@@ -18,6 +18,7 @@ task :prepare_test  do
   #ActiveRecord::Migrator.migrate("db/migrate/", ENV["VERSION"] ? ENV["VERSION"].to_i : nil)
 
   require File.dirname(__FILE__) + '/lib/sms_on_rails/schema_helper'
+  puts SmsOnRails::SchemaHelper.schema(:create, 'sms_on_rails_carrier_tables',  'sms_on_rails_phone_number_tables', 'sms_on_rails_model_tables' )
   instance_eval SmsOnRails::SchemaHelper.schema(:create, 'sms_on_rails_carrier_tables',  'sms_on_rails_phone_number_tables', 'sms_on_rails_model_tables' )
   puts "Seeding SMS tables..."
   require File.dirname(__FILE__) + '/test/test_helper.rb'

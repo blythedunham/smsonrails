@@ -58,7 +58,8 @@ module SmsOnRails::ServiceProviders::AbstractTestSupport
   end
 
   def test_send_message
-    map = provider_instance.send_message('12065555555@txt.att.net', "SEND MESSAGE")
+    map = provider_instance.send_message(send_to_phone_data, "SEND MESSAGE #{send_to_phone_data}")
+    assert(map.is_a?(Hash))
   end
 
   def test_send_to_phone_number_with_white_list
@@ -82,7 +83,6 @@ module SmsOnRails::ServiceProviders::AbstractTestSupport
   def test_send_to_phone
     SmsOnRails::PhoneNumber.delete_all
     response = provider_instance.send_to_phone('1206.555.5555', 'test send to phone', :carrier => 5)
-    puts response
   end
 
   def test_send_to_phone_with_existing_number
@@ -92,7 +92,8 @@ module SmsOnRails::ServiceProviders::AbstractTestSupport
   end
 
   protected
-  
+
+  def send_to_phone_data; '12065551234'; end
   def default_options; {}; end
 
   def provider_klass

@@ -1,0 +1,6 @@
+<% if requires_phone_carrier? %>
+  <p>
+    <%= phone_form.label :carrier_id, 'Phone Carrier' %><br />
+    <%= phone_carriers_collection_select(phone_form) %>
+  </p>
+<% end  %>

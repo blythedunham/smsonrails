@@ -18,14 +18,14 @@ module SmsOnRails
                             :phone_number  => Proc.new{|record| record.phone_number.human_display },
                             :sender_name   => :sender_name
 
-        base.send :alias_method, :full_message, :substituted_draft_message
+        base.send :alias_method, :full_message,      :substituted_draft_message
+        base.send :alias_method, :send_immediately,  :deliver
+        base.send :alias_method, :send_immediately!, :deliver!
 
         base.send :cattr_accessor, :default_options
 
         base.send :accepts_nested_attributes_for, :phone_number
-
-        base.validates_associated :phone_number
-                
+        
         base.send :include, InstanceMethods
         base.send :extend,  ClassMethods
       end
@@ -40,7 +40,7 @@ module SmsOnRails
         end
 
         def create_sms(message, number, options={})
-          draft = reflections[:draft].klass.create_sms(message, number, options)
+          draft = reflections[:draft].klass.create_sms(message, number, options.reverse_merge(:keep_failed_outbounds => true))
           number.is_a?(Array) ? draft.outbounds : draft.outbounds.first
         end
 
@@ -61,6 +61,16 @@ module SmsOnRails
           smses
         end
 
+        #Create the object find the existing phone if already stored
+        def create_with_phone(attributes, draft=nil)
+          outbound = new(attributes)
+          transaction {
+            outbound.assign_existing_phone
+            outbound.draft = draft
+            outbound.save
+          }
+          outbound
+        end
 
       end #ClassMethods
 
@@ -83,11 +93,21 @@ module SmsOnRails
 
         def assign_existing_phone; assign_phone_number(self.phone_number); end
 
-        def draft_message; draft.complete_message; end
+        # The actual (not substituted draft message
+        # Substituted message can be obtained with +substituted_draft_message+
+        def draft_message; draft.complete_message if draft; end
 
-
+        def actual_message
+          read_attribute(:actual_message) || draft_message
+        end
+        
+        #only save the actual message if it differs from the draft message
+        def actual_message=(msg)
+          write_attribute(:actual_message, msg) unless substituted_draft_message == draft_message
+        end
+        
         #Todo
-        def sender_name; 'Blah'; end
+        def sender_name; ''; end
 
         protected
 
@@ -95,9 +115,19 @@ module SmsOnRails
         # this method is called during deliver in the acts_as_deliverable
         def deliver_message(options)
           self.sms_service_provider||= default_service_provider
+
+          # set the actual message if it differs; not a before_save to reduce the
+          # overhead of checking for all commits
+          self.actual_message = substituted_draft_message
+
           result = (self.sms_service_provider).send_sms(self)
           self.unique_id = result[:unique_id] if result.is_a?(Hash)
+       
           result
+        end
+
+        def log_delivery_error(exc)
+          logger.error "SMS Delivery Error: #{self.phone_number.human_display if self.phone_number}: #{exc}"
         end
       end
     end

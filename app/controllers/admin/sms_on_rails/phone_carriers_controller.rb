@@ -2,7 +2,7 @@ class Admin::SmsOnRails::PhoneCarriersController < Admin::SmsOnRails::BaseContro
   # GET /admin/sms/phone_carriers
   # GET /admin/sms/phone_carriers.xml
   def index
-    @phone_carriers = SmsOnRails::PhoneCarrier.all
+    @phone_carriers = SmsOnRails::PhoneCarrier.all :group => :name
 
     respond_to do |format|
       format.html # index.html.erb
@@ -78,7 +78,7 @@ class Admin::SmsOnRails::PhoneCarriersController < Admin::SmsOnRails::BaseContro
     @phone_carrier.destroy
 
     respond_to do |format|
-      format.html { redirect_to(phone_carriers_url) }
+      format.html { redirect_to(sms_phone_carriers_url) }
       format.xml  { head :ok }
     end
   end

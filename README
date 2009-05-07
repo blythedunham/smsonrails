@@ -12,9 +12,8 @@ A lot of care has gone into the locking mechanims to prevent double sends. This
 is a precursor to mass Smsing machine. Further detailed configuration is necessary. Contact
 blythe@snowgiraffe.com if you love grapes.
 
-Coming soon very rough admin controller stubs.
 
-Version -1.0.0 Very much under development
+Version 0.1.0
 
 
 Setup
@@ -27,11 +26,11 @@ Setup
 For more options, run use the --help option
 
 3. Acquire Email and/or SMS Accounts
-Get an account with clickatell (git://github.com/blythedunham/smsonrails.git) or setup your email
+Get an account with clickatell (git://github.com/blythedunham/smsonrails.git) or setup your email settings
 
 4. Migrate
 You can modify the newly generated migration file or run the vanilla
-> rake db/migrate
+> rake db:migrate
 
 5. Edit your applications configuration in environment.rb with settings and password.
 
@@ -56,15 +55,19 @@ SmsOnRails::ServiceProviders::EmailGateway.config =
 
 
 Uncomment out your default SMS sender
-#SmsOnRails::ServiceProviders::Base.default_service_provider ||= SmsOnRails::ServiceProviders::Clickatell.instance
-#SmsOnRails::ServiceProviders::Base.default_service_provider ||= SmsOnRails::ServiceProviders::EmailGateway.instance
+SmsOnRails::ServiceProviders::Base.default_service_provider = SmsOnRails::ServiceProviders::Clickatell.instance
+#SmsOnRails::ServiceProviders::Base.default_service_provider = SmsOnRails::ServiceProviders::EmailGateway.instance
 
-require 'sms_on_rails/all_models'
 ----- ENVIRONMENT.RB -----------------
 
 
 GO!
 
+Default Pages
+Send SMS: http://localhost:3000/sms/new
+Admin: http://localhost:3000/admin/sms
+
+ORM examples:
 #Clickatell does not need a carrier
 SmsOnRails::Outbound.create_sms '12065551234', 'Send this test message', :send_immediately => true
 

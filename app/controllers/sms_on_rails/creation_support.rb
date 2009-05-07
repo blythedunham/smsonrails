@@ -1,11 +1,7 @@
 module SmsOnRails::CreationSupport 
 
   def send_sms
-    @phone_number  = SmsOnRails::PhoneNumber.new
-    @outbound      = SmsOnRails::Outbound.new
-    @draft         = SmsOnRails::Draft.new
-    @outbound.phone_number = @phone_number
-    @draft.outbounds      << @outbound
+    setup_new_draft
 
     respond_to do |format|
       format.html { render_send_sms_template }
@@ -38,13 +34,11 @@ module SmsOnRails::CreationSupport
   # POST /admin/sms/drafts.xml
   def create_sms_draft
 
-    @draft = SmsOnRails::Draft.create_sms(params[:draft], nil, :send_immediately => params[:send_immediately])
-
-    #@draft = SmsOnRails::Draft.new(params[:draft])
-
-    # For each outbound created, find and use the existing phone number
-    # if it exists
-    #@draft.outbounds.each {|o| o.assign_existing_phone }
+    # Create a draft, send it immediately if the send_immediately param is set
+    # and do not throw fatal delivery exception errors
+    @draft = SmsOnRails::Draft.create_sms(params[:draft], nil,
+      :send_immediately => params[:send_immediately],
+      :deliver => {:fatal_exception => nil })
 
     respond_to do |format|
       unless @draft.errors.any?
@@ -52,6 +46,12 @@ module SmsOnRails::CreationSupport
         format.html { render_sms_creation_success }
         format.xml  { render :xml => @draft, :status => :created, :location => @draft }
       else
+        unless @draft.outbounds.any?
+          setup_new_draft
+        else
+          #evil hack as when :id is set, the nested attributes updates don't work
+          @draft.outbounds.each{|o| o.phone_number.id = nil if o.phone_number}
+        end
         sanitize_draft_errors(@draft)
         format.html { render_send_sms_template }
         format.xml  { render :xml => @draft.errors, :status => :unprocessable_entity }
@@ -72,6 +72,14 @@ module SmsOnRails::CreationSupport
     redirect_to(:overwrite_params => {:id => @draft, :action => :show } )
   end
 
+  def setup_new_draft
+    @phone_number  = SmsOnRails::PhoneNumber.new
+    @outbound      = SmsOnRails::Outbound.new
+    @draft         ||= SmsOnRails::Draft.new
+    @outbound.phone_number = @phone_number
+    @draft.outbounds      << @outbound
+  end
+  
   # Clean up the error messages on drafts a little
   def sanitize_draft_errors(draft)
     if draft.errors.any?

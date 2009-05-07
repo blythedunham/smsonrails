@@ -35,7 +35,7 @@ module SmsOnRails
 
       # Find a single number
       def find_by_number(number, options={})
-        find_all_by_numbers(number, options).first;
+        find_all_by_numbers([number], options).first;
       end
 
 
@@ -63,6 +63,7 @@ module SmsOnRails
           list
         end
 
+        
         found_numbers = find_all_by_numbers(number_digits, finder_options, :skip_sanitize => true)
         # sort the list based on the order of the original input
         # not found values have nil

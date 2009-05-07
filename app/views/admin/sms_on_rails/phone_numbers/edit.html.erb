@@ -1,4 +1,4 @@
-<h1>Editing phone_number</h1>
+<h1>Editing Phone Number</h1>
 
 <% form_for(:phone_number, @phone_number, :url => sms_phone_number_path, :html => {:method => :put}) do |f| %>
   <%= f.error_messages %>
@@ -21,7 +21,7 @@
   </p>
   <p>
     <%= f.label :white_list %><br />
-    <%= f.check_box :country_code %>
+    <%= f.check_box :white_list %>
   </p>
 
   <p>

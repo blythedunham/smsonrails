@@ -8,7 +8,8 @@ module SmsOnRails
         :max_messages => 30,
         :fatal_exception => nil,
         :locrec_options => {},
-        :error => "Unable to deliver"
+        :error => "Unable to deliver.",
+        :already_processed_error => 'Already delivered'
       }
       base.extend ClassMethods
     end
@@ -50,9 +51,10 @@ module SmsOnRails
       def deliver(options={})
         deliver!(options)
       rescue Exception => exc
+        log_delivery_error(exc)
         fatal_exception = acts_as_deliverable_options.merge(options)[:fatal_exception]
         raise exc if fatal_exception && exc.is_a?(fatal_exception)
-        self.errors.add_to_base(options[:error]||acts_as_deliverable_options[:error])
+        self.errors.add_to_base(delivery_error_message(exc, options))
         false
       end
 
@@ -67,6 +69,20 @@ module SmsOnRails
       # functionality
       def deliver_message(options={})
         raise(acts_as_deliverable_options[:fatal_exception]||Exception).new "Overwrite deliver_message in base class to perform the actual delivery"
+      end
+
+      protected
+      def delivery_error_message(exc, options)
+        err_msg = if exc.is_a?(SmsOnRails::LockableRecord::AlreadyProcessed)
+          options[:already_processed_error]|| acts_as_deliverable_options[:already_processed_error]
+        end || (options[:error]||acts_as_deliverable_options[:error])
+        err_msg
+      end
+
+      # Override this function to outbound errors
+      # differently to a log or with a different message
+      def log_delivery_error(exc)
+        logger.error "Delivery Error: #{exc}"
       end
     end
   end

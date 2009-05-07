@@ -1,9 +1,10 @@
 module SmsOnRails
   module LockableRecord
 
-    class UnableToLockRecord < Exception
-    end
+    class UnableToLockRecord < Exception; end
+    class AlreadyProcessed   < UnableToLockRecord; end
 
+    
     def self.extended(base)
       base.class_inheritable_hash :locrec_options
 
@@ -13,7 +14,8 @@ module SmsOnRails
           :status        => 'status',
           :processed_on  => 'processed_on',
           :notes         => 'notes',
-          :retry_count   => 'retry_count'
+          :retry_count   => 'retry_count',
+          :sub_status    => 'sub_status'
         },
 
         :status => {
@@ -45,9 +47,9 @@ module SmsOnRails
       # StalerecordErrors are caught and logged
       def lock_record
         if already_processed?
-          raise SmsOnRails::LockableRecord::UnableToLockRecord.new(
+          raise SmsOnRails::LockableRecord::AlreadyProcessed.new(
             "Record #{self.to_param} appears to be processed. #{locrec_columns[:status]}" +
-            "is #{get_locrec_col(:status)} instead of #{locrec_status[:not_processed]}"
+            " is #{get_locrec_col(:status)} instead of #{locrec_status[:not_processed]}"
           )
         end
 
@@ -110,11 +112,17 @@ module SmsOnRails
           #fresh copy in case it was updated
           reload
           if get_locrec_col(:status) == locrec_status[:processing]
+
             set_locrec_col :status, current_status
 
             if locrec_columns[:notes]
               set_locrec_col :notes, "#{current_status}: #{exc.to_s}"
             end
+
+            if locrec_columns[:sub_status] && exc.respond_to?(:sub_status)
+              set_locrec_col :sub_status, exc.sub_status.to_s
+            end
+            
             save!
           end
         rescue Exception => e2

@@ -12,7 +12,7 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
   SERVICE_PROVIDERS = [:clickatell, :email_gateway]
   
   def manifest
-    @actions = (actions.blank?) ? %w(environment migration phone_collision) : self.actions
+    @actions = (actions.blank?) ? %w(environment migration phone_collision assets) : self.actions
     @actions.sort! #we want environment to run first
     @actions.delete('dependencies') if @actions.include?('environment')
 
@@ -25,6 +25,7 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
            when 'dependencies'    then add_dependencies
            when 'migration'       then generate_migration_templates(m)
            when 'phone_collision' then handle_phone_number_collision(m)
+           when 'assets'          then copy_assets(m)
          end
       end
     end
@@ -49,10 +50,10 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
     opt.on("-c", "--skip-carriers",
            "Skip the phone carriers migrations",
            "Default: false") { |v| options[:skip_carriers] = v }
-    opt.on("-p", "--skip-phone_numbers",
+    opt.on("-p", "--skip-phone-numbers",
            "Skip the phone numbers migrations",
            "Default: false") { |v| options[:skip_phone_numbers] = v }
-    opt.on("-s", "--default_service_provider=[name]",
+    opt.on("-s", "--default-service-provider=[name]",
            "Name of the default service provider: clickatell or email_gateway",
            "Default: email_gateway") { |v| options[:default_service_provider] = v }
   end
@@ -80,6 +81,14 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
     #Rails::TemplateRunner.new(File.dirname(__FILE__)+'/runners/dependencies.rb', @destination_root)
   end
 
+  #copy up the public folder
+  def copy_assets(m)
+    create_app_files(m, 'public', :dest_base => '.', :relative_src => '/../../../')
+  end
+  
+    #m.template('/../../app/public/stylesheets/sms_on_rails.css',
+    #'public/stylesheets/sms_on_rails.css')
+  #end
 
   # Use template runner to run specified template and output message
   def run_template(template_name, message = nil)
@@ -166,7 +175,8 @@ EOD
     line << "SmsOnRails::ServiceProviders::Base.default_service_provider = SmsOnRails::ServiceProviders::#{sp_name.to_s.classify}.instance"
     line
   end
-  
+
+
   ##############################################################################
   # Pre Rails engine support: copy to app directly
   ##############################################################################

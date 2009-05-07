@@ -14,11 +14,10 @@ ActionMailer::Base.delivery_method = :test
 class SmsOnRails::ServiceProviders::EmailGatewayTest < Test::Unit::TestCase
 
   include SmsOnRails::ServiceProviders::AbstractTestSupport
-
-
-
   
   protected
+
+  def send_to_phone_data; '12065555555@txt.att.net'; end
 
   def default_options
     {:phone_number => {:carrier_id => 1}}

@@ -1,11 +1,9 @@
-<% form_for(:draft, @draft, :url => {:overwrite_params => { :action => :create,
-        :send_immediately => true,
-        :previous_action => (params[:previous_action]|| params[:action])}}) do |f| %>
+<% form_for(:draft, @draft, :url => send_sms_form_url) do |f| %>
   <%= f.error_messages %>
 
   <p>
     <%= f.label :message %><br />
-    <%= f.text_area :message %>
+    <%= f.text_area :message, :rows => 4 %>
   </p>
 
   <% f.fields_for :outbounds do |outbound_form| %>
@@ -14,15 +12,7 @@
         <%= phone_form.label :number, 'Phone Number' %>
         <%= phone_form.text_field :number, :value => (phone_form.object.human_display if phone_form.object) %>
       </p>
-
-
-      <% if SmsOnRails::ServiceProviders::Base.default_service_provider.requires_carrier? %>
-      <p>
-        <%= phone_form.label :carrier_id, 'Phone Carrier' %><br />
-        <%= phone_carriers_collection_select(phone_form) %>
-      </p>
-      <% end  %>
-
+      <%= render :partial => '/sms_on_rails/phone_carrier_form_item', :locals => {:phone_form => phone_form } %>
     <% end %>
     
     <% unless outbound_form.object.new_record? %>

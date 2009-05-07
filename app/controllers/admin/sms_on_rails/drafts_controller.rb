@@ -1,6 +1,6 @@
 class Admin::SmsOnRails::DraftsController < Admin::SmsOnRails::BaseController
   include SmsOnRails::CreationSupport
-
+  
   # GET /admin/sms/drafts
   # GET /admin/sms/drafts.xml
   def index
@@ -57,7 +57,7 @@ class Admin::SmsOnRails::DraftsController < Admin::SmsOnRails::BaseController
     @draft.destroy
 
     respond_to do |format|
-      format.html { redirect_to(drafts_url) }
+      format.html { redirect_to(sms_drafts_url) }
       format.xml  { head :ok }
     end
   end

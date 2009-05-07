@@ -3,7 +3,7 @@ class Admin::SmsOnRails::OutboundsController < Admin::SmsOnRails::BaseController
   # GET /admin/sms/outbounds.xml
   def index
     if params[:sms_draft_id]
-      @draft = SmsOnRails::Draft.find( params[:sms_draft_id] )
+      @draft = SmsOnRails::Draft.find( params[:sms_draft_id], :include => :outbounds )
       @outbounds = @draft.outbounds
     end
 
@@ -29,7 +29,7 @@ class Admin::SmsOnRails::OutboundsController < Admin::SmsOnRails::BaseController
   # GET /admin/sms/outbounds/new
   # GET /admin/sms/outbounds/new.xml
   def new
-    @outbound = SmsOnRails::Outbound.new
+    @outbound = SmsOnRails::Outbound.new(:sms_draft_id => params[:sms_draft_id])
 
     respond_to do |format|
       format.html # new.html.erb
@@ -45,14 +45,18 @@ class Admin::SmsOnRails::OutboundsController < Admin::SmsOnRails::BaseController
   # POST /admin/sms/outbounds
   # POST /admin/sms/outbounds.xml
   def create
-    @outbound = SmsOnRails::Outbound.new(params[:outbound])
+    @draft = SmsOnRails::Draft.find(params[:sms_draft_id]) if params[:sms_draft_id]
+    @outbound = SmsOnRails::Outbound.create_with_phone(params[:outbound], @draft)
 
     respond_to do |format|
-      if @outbound.save
-        flash[:notice] = 'SmsOnRails::Outbound was successfully created.'
-        format.html { redirect_to(sms_outbound_url(:id => @outbound))}
+      unless @outbound.errors.any?
+        flash[:notice] = 'Outbound was successfully created.'
+        format.html { redirect_to(sms_draft_outbound_path(@draft, @outbound))}
         format.xml  { render :xml => @outbound, :status => :created, :location => @outbound }
       else
+        # evil hack as forms are rejected with an id value
+        @outbound.phone_number.id = nil if @outbound.phone_number
+        
         format.html { render :action => "new" }
         format.xml  { render :xml => @outbound.errors, :status => :unprocessable_entity }
       end
@@ -64,10 +68,18 @@ class Admin::SmsOnRails::OutboundsController < Admin::SmsOnRails::BaseController
   def update
     @outbound = SmsOnRails::Outbound.find(params[:id])
 
+    if params[:outbound]
+      @outbound.update_attributes(params[:outbound])
+    end
+
+    if @outbound.errors.blank? && params[:send_immediately]
+      deliver_sms('Outbound message was updated and sent.')
+    end
+
     respond_to do |format|
-      if @outbound.update_attributes(params[:outbound])
-        flash[:notice] = 'SmsOnRails::Outbound was successfully updated.' + "VAL: #{@outbound.sms_service_provider_id}"
-        format.html { redirect_to(sms_outbound_url(:id => @outbound)) }
+      unless @outbound.errors.any?
+        flash[:notice] = 'Outbound was successfully updated.'
+        format.html { redirect_to(sms_draft_outbound_path(@outbound.draft, @outbound)) }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }
@@ -80,11 +92,26 @@ class Admin::SmsOnRails::OutboundsController < Admin::SmsOnRails::BaseController
   # DELETE /admin/sms/outbounds/1.xml
   def destroy
     @outbound = SmsOnRails::Outbound.find(params[:id])
+    @draft = @outbound.draft
     @outbound.destroy
 
     respond_to do |format|
-      format.html { redirect_to(outbounds_url) }
+      format.html { redirect_to(sms_draft_outbounds_url(@draft)) }
       format.xml  { head :ok }
+    end
+  end
+
+  def deliver_sms(success_message = nil)
+    @outbound ||= SmsOnRails::Outbound.find(params[:id])
+    respond_to do |format|
+      if @outbound.deliver(:fatal_exception => nil)
+        flash[:notice] = success_message || 'Outbound SMS was successfully sent'
+        format.html { redirect_to(sms_draft_outbound_path(@outbound)) }
+        format.xml  { head :ok }
+      else
+        format.html { render :action => :edit }
+        format.xml  { render :xml => @outbound.errors, :status => :unprocessable_entity }
+      end
     end
   end
 end

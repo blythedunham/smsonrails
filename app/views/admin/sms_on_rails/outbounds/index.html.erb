@@ -1,45 +1,37 @@
 <%  if @draft %>
-  <h1> Draft </h1>
+  <h1> SMS Draft Outbounds</h1>
   <%= render :partial => 'admin/sms_on_rails/drafts/show.html.erb' %>
 <% end %>
 
-<h1>Listing SMS Outbounds</h1>
-
+<h2>SMS Outbounds</h2>
 <table>
   <tr>
+    <th class="short">Id</th>
+    <th class="long">Phone number</th>
     <th>Status</th>
-    <th>Notes</th>
+    <th class="long">Message</th>
     <th>Procesed on</th>
     <th>Sms service provider</th>
-    <th>Created at</th>
-    <th>Retry count</th>
     <th>Sub status</th>
-    <th>Options</th>
-    <th>Send priority</th>
-    <th>Draft</th>
-    <th>Phone number</th>
   </tr>
-
-<% @outbounds.each do |outbound| %>
-  <tr>
+  <% staggered_table_rows(@outbounds) do |outbound| %>
+    <td><%=h outbound.id %></td>
+    <td><%= link_to_sms_phone_number(outbound.phone_number) %></td>
     <td><%=h outbound.status %></td>
-    <td><%=h outbound.notes %></td>
+    <td><%= link_to_sms_draft(outbound.draft, outbound.actual_message)  %></td>
     <td><%=h outbound.processed_on %></td>
     <td><%=h outbound.sms_service_provider_name %></td>
-    <td><%=h outbound.created_at %></td>
-    <td><%=h outbound.retry_count %></td>
     <td><%=h outbound.sub_status %></td>
-    <td><%=h outbound.options %></td>
-    <td><%=h outbound.send_priority %></td>
-    <td><%= link_to_sms_draft(outbound.draft)  %></td>
-    <td><%= link_to_sms_phone_number(outbound.phone_number) %></td>
-    <td><%= link_to 'Show', sms_outbound_path(outbound) %></td>
-    <td><%= link_to 'Edit', edit_sms_outbound_path(outbound) %></td>
-    <td><%= link_to 'Destroy', sms_outbound_path(outbound), :confirm => 'Are you sure?', :method => :delete %></td>
-  </tr>
+    <td><%= link_to('Send', :action => :deliver_sms, :id => outbound.to_param) unless outbound.delivered?  %></td>
+    <td><%= link_to 'Show', sms_draft_outbound_path(@draft, outbound) %></td>
+    <td><%= link_to 'Edit', edit_sms_draft_outbound_path(@draft, outbound) %></td>
+    <td><%= link_to 'Destroy', sms_draft_outbound_path(@draft, outbound), :confirm => 'Are you sure?', :method => :delete %></td>
 <% end %>
 </table>
 
 <br />
-
-<%= link_to 'New outbound', new_sms_outbound_path %>
+<%  if @draft %>
+  <%= link_to 'New outbound', new_sms_draft_outbound_path(@draft) %> |
+  <%= link_to 'Edit Draft', edit_sms_draft_path(@draft) %> |
+  <%= link_to 'List of Drafts', sms_drafts_path %>
+<% end %>

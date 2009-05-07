@@ -10,6 +10,11 @@ end
 
 class SmsOnRails::DeliveryAndLockingTest  < Test::Unit::TestCase
 
+  def setup
+    super
+    SmsOnRails::ServiceProviders::Base.default_service_provider = SmsOnRails::ServiceProviders::Dummy.instance
+  end
+
   def test_failed_delivery_with_exception
     SmsOnRails::Outbound.send :alias_method_chain, :deliver_message, :exception
     SmsOnRails::Outbound.delete_all
@@ -34,6 +39,7 @@ class SmsOnRails::DeliveryAndLockingTest  < Test::Unit::TestCase
     SmsOnRails::Outbound.delete_all
 
     sms = SmsOnRails::Outbound.send_immediately 'hi', '2065552476'
+    assert(sms, "SHOULD create and SMS object")
     assert(sms.errors.any?, "Expecting deliver errors.")
 
     assert_equal(sms.errors.on(:base), 'Unable to send message.')
@@ -61,7 +67,7 @@ class SmsOnRails::DeliveryAndLockingTest  < Test::Unit::TestCase
      assert_raises(SmsOnRails::LockableRecord::UnableToLockRecord) { sms.deliver! }
   end
 
-  def test_deliver_already_processed_record_should_raise_unlockable_error
+  def test_deliver_already_processed_record_should_raise_already_processed_error
 
      SmsOnRails::Outbound.delete_all
 
@@ -72,7 +78,7 @@ class SmsOnRails::DeliveryAndLockingTest  < Test::Unit::TestCase
      sms.save!
 
      #should be unlockable because status is not set to NOT_PROCESSED
-     assert_raises(SmsOnRails::LockableRecord::UnableToLockRecord) { sms.deliver! }
+     assert_raises(SmsOnRails::LockableRecord::AlreadyProcessed) { sms.deliver! }
   end
 end
 

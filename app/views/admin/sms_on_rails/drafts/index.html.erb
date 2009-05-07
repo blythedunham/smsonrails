@@ -1,8 +1,9 @@
-<h1>Listing SMS Drafts</h1>
+<h1>SMS Drafts</h1>
 
-<table>
+<table class="stagger">
   <tr>
-    <th>Message</th>
+    <th class="short">Id</th>
+    <th class="long">Message</th>
     <th>Header</th>
     <th>Footer</th>
     <th>Status</th>
@@ -10,21 +11,22 @@
     <th>Delivery date</th>
   </tr>
 
-<% @drafts.each do |draft| %>
-  <tr>
+  <% staggered_table_rows(@drafts) do |draft| %>
+    <td class="short"><%=h draft.id      %></td>
     <td><%=h draft.message %></td>
     <td><%=h draft.header %></td>
     <td><%=h draft.footer %></td>
     <td><%=h draft.status %></td>
     <td><%=h draft.deliver_after %></td>
     <td><%=h draft.delivery_date %></td>
-    <td><%= link_to 'Show',    sms_draft_outbounds_path(:sms_draft_id => draft)%></td>
-    <td><%= link_to 'Edit',    edit_sms_draft_path(draft) %></td>
-    <td><%= link_to 'Destroy', sms_draft_path(draft), :confirm => 'Are you sure?', :method => :delete %></td>
-  </tr>
+    <td class="links"><%= link_to 'Show',    sms_draft_outbounds_path(draft)%></td>
+    <td class="links"><%= link_to 'Edit',    edit_sms_draft_path(draft) %></td>
+    <td class="links"><%= link_to 'Destroy', sms_draft_path(draft), :confirm => 'Are you sure?', :method => :delete %></td>
 <% end %>
 </table>
 
+
 <br />
 
-<%= link_to 'New draft', new_sms_draft_path %>
+<%= link_to 'New draft', new_sms_draft_path %> |
+<%= link_to 'Send SMS', send_sms_new_sms_draft_path %>

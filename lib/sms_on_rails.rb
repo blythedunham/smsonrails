@@ -1,5 +1,4 @@
 $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__))
-$LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), 'models'))
 
 Dir.glob(File.dirname(__FILE__) + '/sms_on_rails/activerecord_extensions/*.rb'){|f| require f}
 

@@ -86,14 +86,16 @@ module SmsOnRails
       #
       # Refer to send_to_phone for more infomation on validation
       def send_sms(sms, options={})
-        send_to_phone(sms.phone_number, sms.full_message, options)
+        send_to_phone(sms.phone_number, sms.actual_message, options)
       end
 
       protected
 
       #can override in subclass if different finder should be used
       def find_or_create_phone_number(phone_text, options={})
-        phone_klass.find_by_number(phone_text, options.reverse_merge(:create => true))
+        phone = phone_klass.find_and_create_by_number(phone_text)
+        phone.assign_carrier(options[:carrier]) if options[:carrier]
+        phone
       end
 
       #override this if the expected format differs in subclass
@@ -196,7 +198,7 @@ module SmsOnRails
          def get_service_provider(provider)
            case provider.class.to_s
             when 'Fixnum'           then provider_by_id(provider)
-            when 'String'           then (value.to_i > 0 ? provider_by_id(provider) : provider_by_name(provider))
+            when 'String'           then (provider.to_i > 0 ? provider_by_id(provider) : provider_by_name(provider))
             when 'Symbol'           then provider_by_name(provider)
             when 'NilClass'         then nil
             else

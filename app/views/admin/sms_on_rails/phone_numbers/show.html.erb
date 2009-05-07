@@ -1,3 +1,8 @@
+<h1>Phone Number <%=h @phone_number.human_display %></h1>
+<p>
+  <b>Id:</b>
+  <%= h @phone_number.id %>
+</p>
 <p>
   <b>Number:</b>
   <%=h @phone_number.human_display %>
@@ -5,7 +10,7 @@
 
 <p>
   <b>Carrier:</b>
-  <%=h @phone_number.carrier_id %>
+  <%=  phone_number_carrier_link @phone_number %>
 </p>
 
 <p>

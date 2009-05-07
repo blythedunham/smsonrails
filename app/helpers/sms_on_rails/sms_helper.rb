@@ -7,9 +7,9 @@ module SmsOnRails::SmsHelper
     link_to phone_number.human_display, sms_phone_number_url(:id => phone_number)
   end
 
-  def link_to_sms_draft(draft)
+  def link_to_sms_draft(draft, message=nil)
     return '' unless draft
-    link_to draft.message, sms_draft_url(:id => draft)
+    link_to((message||draft.message), sms_draft_url(:id => draft))
   end
 
   def service_providers_collection_select(form)
@@ -21,6 +21,24 @@ module SmsOnRails::SmsHelper
   def sms_on_rails_status_select(form, options={})
     form.select(:status, form.object.class.locrec_status.values.collect{|x| [x.titleize, x]},
       options)
+  end
+
+  def requires_phone_carrier?
+    SmsOnRails::ServiceProviders::Base.default_service_provider.requires_carrier?
+  end
+  
+  def send_sms_form_url
+    {:controller => controller_name, :action => :create,
+     :send_immediately => true,
+     :previous_action => (params[:previous_action]|| params[:action])}
+  end
+
+  def staggered_table_rows(objs, &block)
+    objs.each_with_index do |obj, idx|
+      concat("<tr class=\"#{idx % 2 == 0 ? 'even' : 'odd'}\"")
+      yield(obj)
+      concat("</tr>")
+    end
   end
 
 end

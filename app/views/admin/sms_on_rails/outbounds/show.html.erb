@@ -1,7 +1,19 @@
 <p>
+  <b>Id:</b>
+  <%= h @outbound.id %>
+</p>
+
+<p>
   <b>Status:</b>
   <%=h @outbound.status %>
 </p>
+
+<% if @outbound.delivered? %>
+  <p>
+    <b>Message</b>
+    <%=h @outbound.actual_message %>
+  </p>
+<% end %>
 
 <p>
   <b>Notes:</b>
@@ -53,6 +65,5 @@
   <%= link_to_sms_phone_number(@outbound.phone_number) %>
 </p>
 
-
-<%= link_to 'Edit', edit_sms_outbound_path(@outbound) %> |
-<%= link_to 'Back', sms_outbounds_path %>
+<%= link_to 'Edit', edit_sms_draft_outbound_path(@outbound.draft, @outbound) %> |
+<%= link_to 'Back', sms_draft_outbounds_path(@outbound.draft) %>

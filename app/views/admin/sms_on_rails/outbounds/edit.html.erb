@@ -1,6 +1,6 @@
 <h1>Editing outbound</h1>
 
-<% form_for(:outbound, @outbound, :url => sms_outbound_path(:id => @outbound), :html => {:method => :put}) do |f| %>
+<% form_for(:outbound, @outbound, :url => sms_draft_outbound_path(@outbound.draft, @outbound), :html => {:method => :put}) do |f| %>
   <%= f.error_messages %>
 
   <p>
@@ -53,11 +53,16 @@
     <%= link_to_sms_draft(draft_form.object) %>
   <% end %>
   </p>
-
+  <% unless @outbound.delivered? %>
+    <p>
+      <%= f.label :send_immediately  %><br />
+      <%= check_box_tag :outbound_send_immediately %>
+    </p>
+  <% end %>
   <p>
     <%= f.submit 'Update' %>
   </p>
 <% end %>
 
-<%= link_to 'Show', sms_outbound_path(:id => @outbound) %> |
-<%= link_to 'Back', sms_outbounds_path %>
+<%= link_to 'Show', sms_draft_outbound_path(@outbound.draft, @outbound) %> |
+<%= link_to 'Back', sms_draft_outbounds_path(@outbound.draft) %>

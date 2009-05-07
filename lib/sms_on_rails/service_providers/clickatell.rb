@@ -5,6 +5,8 @@ module SmsOnRails
     class Clickatell < Base
       self.provider_id = 1
 
+      FATAL_ERROR_CODES = %w(105 114)
+
       def ping
         result = invoke_clickatell{ api.ping(nil) }
         result.is_a?(Net::HTTPOK)
@@ -36,7 +38,7 @@ module SmsOnRails
         yield
         
       rescue ::Clickatell::API::Error => cae
-        raise sms_error_class{ cae.code != "105" }.new("Clickatell Error:#{cae.message}")
+        raise sms_error_class{ !(FATAL_ERROR_CODES.include?(cae.code)) }.new("Clickatell Error:#{cae.code}:#{cae.message}", cae.code)
       end
     end
   end
