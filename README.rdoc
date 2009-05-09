@@ -1,0 +1,163 @@
+= SmsOnRails
+
+Sms on Rails provides an interface and ORM framework for sending and storing SMS messages through Email Gateway or with Clickatell HTTPS
+
+The models and underlying architecture extend and include a ton of modules
+and are designed to be configured if necessary. If you do not wish to run the
+vanilla configuration, copy the vendor/plugins/sms_on_rails/lib/models to your
+local models directory.
+
+A lot of care has gone into the locking mechanism to prevent double sends. This
+is a precursor to mass Smsing machine. Further detailed configuration is necessary. Contact
+blythe@snowgiraffe.com if you love grapes.
+
+
+
+== Install
+  script/plugin install git://github.com/blythedunham/smsonrails.git
+
+=== Quick Install
+  script/plugin install git://github.com/blythedunham/smsonrails.git
+ 
+  script/generate sms_on_rails setup --default-service-provider=[provider]
+
+  rake db:migrate
+
+Edit SMS configuration details in <tt>config/environment.rb</tt>. Sign up for clickatell at http://clickatell.com and/or update your mail settings for use with the email gateways.
+
+=== Example Setup
+The following creates a new rails project +dog+ and adds the Sms On Rails plugin. As seen at RailsConf2009
+
+  rails dog --database=mysql
+  mysqladmin -uroot create dog_development
+  cd dog
+  script/plugin install git://github.com/blythedunham/smsonrails
+  script/generate sms_on_rails setup --default-service-provider=clickatell
+  rake db:migrate
+  mate config/environment.rb
+
+
+=== Run Setup Generator
+  script/generate sms_on_rails setup --default-service-provider=[provider]
+
+Running the generator performs several setup steps:
+
+* copy image and stylesheet assets to your public directory
+* generates 3 database migrations (the 2nd and 3rd have a 2 and 3 appended)
+* installs clickatell gem and static_record_cache plugin (for email carriers caching)
+* insert configuration skeleton into environment.rb
+  
+=== Migrate
+Three files are created with different timestamps in <tt>db/migrate</tt>
+* Email Carrier information (email addresses for each carrier like txt.att.net)
+* Phone Number setup. 
+* Draft and Outbound tables
+
+Check them out and then run:
+  rake db:migrate
+
+=== Configure settings
+After running the generator, open up <tt>config/environment.rb</tt> in your rails application. Update the configuration hash maps, added by the generator, with your settings. 
+
+* email gateways - <tt>SmsOnRails::ServiceProviders::EmailGateway.config</tt>. Standard +ActionMailer+ configuration is required for the Email Gateway.
+
+* clickatell http - <tt>SmsOnRails::ServiceProviders::Clickatell.config</tt>. Sign up for an account at http://clickatell.com
+
+Ensure that the correct default provider is selected. 
+  SmsOnRails::ServiceProviders::Base.default_service_provider=
+
+Also make sure that the correct default provider is selected.
+
+<b> Added to environment.rb</b>
+
+  SmsOnRails::ServiceProviders::Clickatell.config = {
+    :api_id => 'api_key',
+    :user_name => 'user_name',
+    :password => 'password'
+  }
+
+  SmsOnRails::ServiceProviders::EmailGateway.config = {
+    :sender => 'youremail address',
+    :subject => 'Default Subject Text'
+    #:bcc => nil,
+    #:mailer_klass => nil,
+  }
+
+  #Default inherits from ActionMailer
+  #SmsOnRails::ServiceProviders::EmailGatewaySupport::SmsMailer.smtp_settings ={}
+
+
+  #Uncomment out your default SMS sender
+  SmsOnRails::ServiceProviders::Base.default_service_provider = SmsOnRails::ServiceProviders::Clickatell.instance
+  #SmsOnRails::ServiceProviders::Base.default_service_provider = SmsOnRails::ServiceProviders::EmailGateway.instance
+
+
+== Avoiding Collisions with existing PhoneNumber class
+If you already have a <tt>PhoneNumber ActiveRecord</tt> class and +phone_number+ database table, you might experience a collision with the SMSOnRails engine. To avoid this, the generator will take the following measures.
+
+=== PhoneNumber Migration
+Instead of creating a new table, the phone number migration created by the generator will add only the columns needed by +SMSOnRails+. Please make sure to check out the migration for errors.
+
+=== PhoneNumber ActiveRecord Class Changes
+The generator will update <tt>PhoneNumber</tt> and add <tt>SmsOnRails::PhoneNumber</tt>
+
+<b>PhoneNumber app/models/sms_on_rails/phone_number.rb</b>
+This file is added and used to point <tt>SmsOnRails::PhoneNumber</tt> point to +PhoneNumber+
+
+
+<b>PhoneNumber app/models/phone_number.rb</b>
+The following two modules are included on your +PhoneNumber+ class:
+* <tt>SmsOnRails::ModelSupport::PhoneNumber</tt> - basic functionality
+* <tt>SmsOnRails::ModelSupport::PhoneNumberAssociations</tt> - associations for +PhoneNumber+
+
+These modules are defined in: 
+  vendor/plugins/smsonrails/lib/sms_on_rails/model_support
+
+Please manually modify your +PhoneNumber+ class to change the associations if you must.
+
+
+
+== Default SMS Routes
+
+Default Links in Your Application
+* Send SMS: http://localhost:3000/sms/new
+* Admin: http://localhost:3000/admin/sms
+  * Draft History:   http://localhost:3000/admin/sms/draft
+  * Phone Numbers:   http://localhost:3000/admin/sms/phone_numbers
+  * Phone Carriers:  http://localhost:3000/admin/sms/phone_carriers
+
+
+== Send Messages
+
+=== Access Service Providers Directly
+All service providers are singletons and can be accessed by their instance
+
+To send a message without validation use +send_message+
+  SmsOnRails::ServiceProviders::<Provider>.instance.send_message '12065551234', 'my message', options
+
+To send a message with validation use +send_to_phone_number+ with a string or  SmsOnRails::PhoneNumber instance
+  SmsOnRails::ServiceProviders<Provider>.instance.send_to_phone_number(number, message, options)
+
+ To send an sms (+Outbound+) (with validation)
+  SmsOnRails::ServiceProviders<Provider>.instance.send_sms(sms, options)
+ However, it is preferred to use the locking mechanism to prevent double messages from being sent
+   sms.deliver!
+
+=== ORM examples:
+Clickatell does not need a carrier
+  SmsOnRails::Outbound.create_sms '12065551234', 'Send this test message', :send_immediately => true
+
+Email gateway needs a carrier specified
+  sms = SmsOnRails::Outbound.create_sms '12065551234', 'Send this test message', :carrier => :att
+  sms.deliver!
+
+
+
+== License
+
+This is MartiniWare. Buy yourself a martini if you like this software.
+
+blythe at snowgiraffe dot com
+http://snowgiraffe.com
+
+Copyright (c) 2009 Blythe Dunham, released under the MIT license
