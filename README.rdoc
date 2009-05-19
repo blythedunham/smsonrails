@@ -15,7 +15,7 @@ blythe@snowgiraffe.com if you love grapes.
 
 === Install Gem
 <b>Add to environment.rb </b>
-  config.gem 'blythedunham-smsonrails', :lib => 'sms_on_rails', :source  => 'http://gems.github.com'
+  config.gem 'blythedunham-sms_on_rails', :lib => 'sms_on_rails', :source  => 'http://gems.github.com'
   config.gem 'clickatell' #If using Clickatell
 
 Vendor the Gem
@@ -33,7 +33,7 @@ Vendor the Gem
 === Alternate Install
 <b>Directly Install Gem</b>
   gem sources -a http://gems.github.com
-  sudo gem install blythedunham-smsonrails
+  sudo gem install blythedunham-sms_on_rails
 
 <b>Plugin</b>
   script/plugin install git://github.com/blythedunham/smsonrails.git
