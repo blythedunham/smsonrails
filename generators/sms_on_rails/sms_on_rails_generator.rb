@@ -1,4 +1,3 @@
-
 require 'rails_generator/generators/applications/app/template_runner'
 require File.dirname(__FILE__) + '/commands/inserts.rb'
 require File.dirname(__FILE__) + '/commands/timestamps.rb'
@@ -7,9 +6,12 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
 
   default_options  :skip_models => false,         :skip_carriers => false,
                    :skip_phone_numbers => false,  :skip_migration => false,
-                   :default_service_provider => :email_gateway
+                   :default_service_provider =>   :email_gateway
 
-  SERVICE_PROVIDERS = [:clickatell, :email_gateway]
+  unless defined?(SERVICE_PROVIDERS)
+    SERVICE_PROVIDERS           = [:clickatell, :email_gateway]
+    SET_SERVICE_PROVIDER_CONFIG = "SmsOnRails::ServiceProviders::Base.set_default_service_provider"
+  end
   
   def manifest
     @actions = (actions.blank?) ? %w(environment migration phone_collision assets) : self.actions
@@ -22,7 +24,7 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
            when 'views'           then create_views(m)
            when 'models'          then copy_models(m)
            when 'environment'     then add_configuation_options(m)
-           when 'dependencies'    then add_dependencies
+           when 'dependencies'    then add_dependencies(m)
            when 'migration'       then generate_migration_templates(m)
            when 'phone_collision' then handle_phone_number_collision(m)
            when 'assets'          then copy_assets(m)
@@ -55,7 +57,7 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
            "Default: false") { |v| options[:skip_phone_numbers] = v }
     opt.on("-s", "--default-service-provider=[name]",
            "Name of the default service provider: clickatell or email_gateway",
-           "Default: email_gateway") { |v| options[:default_service_provider] = v }
+           "Default: email_gateway") { |v| options[:default_service_provider] = v.to_s.downcase.underscore.to_sym }
   end
 
   # If app/models/phone_number.rb exists, add include the Sms functionality
@@ -74,21 +76,23 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
   end
 
   # add sms on rails dependencies such as the clickatell gem and static record cache
-  def add_dependencies
-    logger.log 'gem', 'clickatell'
+  def add_dependencies(m)
+    add_clickatell_gem(m) if options[:default_service_provider] == :clickatell
     logger.log 'plugin', 'static_record_cache'
     run_template 'dependencies'
-    #Rails::TemplateRunner.new(File.dirname(__FILE__)+'/runners/dependencies.rb', @destination_root)
   end
 
+  # add the clickatell gem dependency to the app's config/enviornment.rb file
+  def add_clickatell_gem(m)
+    logger.log 'gem', 'clickatell'
+    m.insert_into 'config/environment.rb', "config.gem 'clickatell'\n",
+                  :margin => 2, :insert_after => /Rails::Initializer\.run.*\n/, :quiet => true
+  end
+  
   #copy up the public folder
   def copy_assets(m)
     create_app_files(m, 'public', :dest_base => '.', :relative_src => '/../../../')
   end
-  
-    #m.template('/../../app/public/stylesheets/sms_on_rails.css',
-    #'public/stylesheets/sms_on_rails.css')
-  #end
 
   # Use template runner to run specified template and output message
   def run_template(template_name, message = nil)
@@ -131,7 +135,7 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
 
   def add_configuation_options(m)
     add_require_all_models unless supports_engines?
-    add_dependencies
+    add_dependencies(m)
 
     logger.update "configuration options in environment.rb"
     disable_logger do
@@ -151,7 +155,6 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
 
   def add_service_provider_configuration(m)
     SERVICE_PROVIDERS.each do |sp_name|
-
       config_file = File.dirname(__FILE__) + "/templates/configuration/#{sp_name}.rb"
       if File.exists?(config_file)
         m.insert_into 'config/environment.rb', File.read(config_file),
@@ -161,19 +164,12 @@ class SmsOnRailsGenerator < Rails::Generator::NamedBase
     end
   end
 
-    def add_default_service_provider(m)
-    line =<<-EOD
-#Uncomment out your default SMS sender
-#{service_provider_line :clickatell}
-#{service_provider_line :email_gateway}
-EOD
-    m.insert_into "config/environment.rb", line, :margin => 0, :append => true, :quiet => true
-  end
 
-  def service_provider_line(sp_name)
-    line = options[:default_service_provider].to_s == sp_name.to_s ? '' : '#'
-    line << "SmsOnRails::ServiceProviders::Base.default_service_provider = SmsOnRails::ServiceProviders::#{sp_name.to_s.classify}.instance"
-    line
+  def add_default_service_provider(m)
+    line = "#{SET_SERVICE_PROVIDER_CONFIG} #{options[:default_service_provider].to_sym.inspect}"
+
+    m.insert_into "config/environment.rb", line, :margin => 0, :quiet => true,
+      :replace => Regexp.new("#{SET_SERVICE_PROVIDER_CONFIG}.*(\\n|$)")
   end
 
 
@@ -197,7 +193,6 @@ EOD
     return if supports_engines?
     run_template 'sms_on_rails_routes', ['routes', 'sms_on_rails routes']
   end
-
 
   #return true if the rails version has support for engines
   def supports_engines?

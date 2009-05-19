@@ -21,6 +21,8 @@ blythe@snowgiraffe.com if you love grapes.
  
   script/generate sms_on_rails setup --default-service-provider=[provider]
 
+  rake gems:install (if using Clickatell)
+
   rake db:migrate
 
 Edit SMS configuration details in <tt>config/environment.rb</tt>. Sign up for clickatell at http://clickatell.com and/or update your mail settings for use with the email gateways.
@@ -63,8 +65,8 @@ After running the generator, open up <tt>config/environment.rb</tt> in your rail
 
 * clickatell http - <tt>SmsOnRails::ServiceProviders::Clickatell.config</tt>. Sign up for an account at http://clickatell.com
 
-Ensure that the correct default provider is selected. 
-  SmsOnRails::ServiceProviders::Base.default_service_provider=
+Ensure that the correct default provider is selected. Should be <tt>:email_gateway</tt> or <tt>:clickatell</tt>
+  SmsOnRails::ServiceProviders::Base.set_default_service_provider :clickatell
 
 Also make sure that the correct default provider is selected.
 
@@ -83,14 +85,7 @@ Also make sure that the correct default provider is selected.
     #:mailer_klass => nil,
   }
 
-  #Default inherits from ActionMailer
-  #SmsOnRails::ServiceProviders::EmailGatewaySupport::SmsMailer.smtp_settings ={}
-
-
-  #Uncomment out your default SMS sender
-  SmsOnRails::ServiceProviders::Base.default_service_provider = SmsOnRails::ServiceProviders::Clickatell.instance
-  #SmsOnRails::ServiceProviders::Base.default_service_provider = SmsOnRails::ServiceProviders::EmailGateway.instance
-
+  SmsOnRails::ServiceProviders::Base.set_default_service_provider = :email_gateway
 
 == Avoiding Collisions with existing PhoneNumber class
 If you already have a <tt>PhoneNumber ActiveRecord</tt> class and +phone_number+ database table, you might experience a collision with the SMSOnRails engine. To avoid this, the generator will take the following measures.
@@ -115,6 +110,14 @@ These modules are defined in:
 
 Please manually modify your +PhoneNumber+ class to change the associations if you must.
 
+== ActionMailer
+
+You will need to configure ActionMailer in environment.rb if you wish to use the
+Email Gateway. Refer to the Troubleshooting section for more information.
+
+By default, SmsMailer inherits the ActionMailer settings. If your SMS Mailer settings
+differ from the default ActionMailer settings, you can define the new settings in enviroment.rb with:
+  SmsOnRails::ServiceProviders::EmailGatewaySupport::SmsMailer.smtp_settings ={}
 
 
 == Default SMS Routes
@@ -152,12 +155,44 @@ Email gateway needs a carrier specified
   sms.deliver!
 
 
+== Troubleshooting
+
+=== Clickatell
+
+<b> Install Clickatell gem </b>
+If you are using clickatell, please install the clickatell gem with either command:
+  sudo rake gems:unpack
+  sudo rake gems:install
+  sudo gem install clickatell
+
+Possible Error messages:
+* Missing these required gems: clickatell
+* Cannot set default provider to clickatell. Check that support for clickatell exists.
+
+=== Email Gateway
+<b> ActionMailer</b>
+If you are using the email gateways, make sure that your +ActionMailer+ settings are
+configured properly in <tt>environment.rb</tt>. A good test is to send a normal email.
+
+You can also test your settings by adding the line below to your environment.rb file.
+
+  ActionMailer::Base.delivery_method = :test
+
+The message should be print to the log file <tt>log/development.rb</tt> like below:
+  To: 2035553215@vtext.com
+  Subject: Default Subject Text
+  Mime-Version: 1.0
+  Content-Type: text/plain; charset=utf-8
+
+  This is my test message
+
+== Developers
+* Blythe Dunham http://snowgiraffe.com
+
+== Homepage
+* Project Site: http://github.com/blythedunham/smsonrails
 
 == License
-
-This is MartiniWare. Buy yourself a martini if you like this software.
-
-blythe at snowgiraffe dot com
-http://snowgiraffe.com
+This is MartiniWare. Buy yourself a martini if you like this software! If you like any software that uses this plugin you should also buy yourself a martini. Manhattans are ok too.
 
 Copyright (c) 2009 Blythe Dunham, released under the MIT license

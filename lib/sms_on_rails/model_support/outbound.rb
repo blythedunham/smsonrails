@@ -52,6 +52,7 @@ module SmsOnRails
         def create_outbounds_for_phone_numbers(phone_numbers, options={})
           smses = reflections[:phone_number].klass.find_and_create_all_by_numbers(phone_numbers, (options[:find]||{}).reverse_merge(:create => :new)).inject([]) do |smses, phone|
             phone.attributes = options[:phone_number] if options[:phone_number]
+            phone.carrier = options[:carrier] if options[:carrier]
             sms = self.new(options[:sms]||{})
             sms.phone_number = phone
             sms.service_provider = options[:service_provider] if options[:service_provider]

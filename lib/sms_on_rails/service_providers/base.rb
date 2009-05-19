@@ -146,13 +146,20 @@ module SmsOnRails
 
       class << self
 
+         def set_default_service_provider(provider)
+           return if $gems_rake_task
+           provider_instance = get_service_provider(provider)
+           raise SmsOnRails::FatalSmsError.new("Cannot set default provider to #{provider}. Check that support for #{provider} exists.") unless provider_instance
+           self.default_service_provider = provider_instance
+         end
+         
          def max_characters
            self.config[:max_characters]||140
          end
 
          # Name of service provider (downcase no spaces)
          def name
-           @name ||= self.to_s.demodulize.downcase
+           @name ||= self.to_s.demodulize.underscore
          end
 
          # Human name of provider
@@ -172,7 +179,11 @@ module SmsOnRails
          def provider_list
            @provider_list ||= subclasses.inject([]) do |list, klass_name|
              klass = klass_name.constantize
-             list << klass.instance
+             begin
+               list << klass.instance
+             rescue LoadError => exc
+               logger.error "#{klass} load error: #{exc}"
+             end
              list
            end
          end

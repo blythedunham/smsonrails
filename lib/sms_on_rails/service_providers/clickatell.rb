@@ -1,12 +1,19 @@
-require 'clickatell'
-
 module SmsOnRails
   module ServiceProviders
     class Clickatell < Base
       self.provider_id = 1
 
-      FATAL_ERROR_CODES = %w(105 114)
-
+      FATAL_ERROR_CODES = %w(105 114) unless defined?(FATAL_ERROR_CODES)
+      
+      def initialize
+        begin
+          require 'clickatell'
+        rescue LoadError => exc
+          raise LoadError.new(exc.to_s + " Please make sure the clickatell gem is installed.")
+        end
+        super
+      end
+      
       def ping
         result = invoke_clickatell{ api.ping(nil) }
         result.is_a?(Net::HTTPOK)
@@ -43,5 +50,3 @@ module SmsOnRails
     end
   end
 end
-
-SmsOnRails::ServiceProviders::Clickatell.config ||= {:url => 'http://clickatell.com'}

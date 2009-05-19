@@ -52,7 +52,7 @@ module SmsOnRails
 
           # Generate new phone_numbers
           draft.create_outbounds_for_phone_numbers(phone_numbers, options) if phone_numbers
-          
+
           if draft.send(options[:bang] ? :save! : :save) && options[:send_immediately]
             if !draft.send(options[:bang] ? :deliver! : :deliver, options[:deliver])
               # this is really crappy but when we are sending multiple messages

@@ -5,6 +5,3 @@ SmsOnRails::ServiceProviders::EmailGateway.config =
    #:bcc => nil,
    #:mailer_klass => nil
 }
-
-#Default inherits from ActionMailer
-#SmsOnRails::ServiceProviders::EmailGatewaySupport::SmsMailer.smtp_settings ={}

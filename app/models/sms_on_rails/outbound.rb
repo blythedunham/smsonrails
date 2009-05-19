@@ -6,7 +6,10 @@ module SmsOnRails
 
     #adding this here instead of support since might not want it
     #for performance reasons
-    validates_uniqueness_of :sms_phone_number_id, :scope => :sms_draft_id, :message => 'is already included as an outbound for this draft'
+    validates_uniqueness_of :sms_phone_number_id, 
+      :scope      => :sms_draft_id,
+      :message    => 'is already included as an outbound for this draft',
+      :if         => Proc.new { |outbound| outbound.sms_draft_id }
     
     include SmsOnRails::ModelSupport::Outbound
 
