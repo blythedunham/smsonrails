@@ -1,4 +1,4 @@
-
+require 'active_support'
 require File.dirname(__FILE__) + '/../lib/sms_on_rails/schema_helper'
 
 namespace :sms do

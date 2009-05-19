@@ -1,6 +1,7 @@
 require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
+require 'echoe'
 
 desc 'Default: run unit tests.'
 task :default => :test
@@ -60,4 +61,16 @@ task :create_templates do
     system("cp -r #{src_dir}/#{f} #{dest_dir}/#{f}")
   end
 end
+
+Echoe.new('sms_on_rails', '0.1.0') do |p|
+  p.description = "Integrate your application with SMS through Clickatell or the Email Gateways"
+  p.url = "http://github.com/blythedunham/smsonrails"
+  p.author = "Blythe Dunham"
+  p.email = "blythe@snowgiraffe.com"
+  p.ignore_pattern = ["tmp/*", "script/*"]
+  p.development_dependencies = []
+end
+
+Dir["#{File.dirname(__FILE__)}/tasks/*.rake"].sort.each { |ext| load ext }
+
 

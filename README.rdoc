@@ -4,26 +4,39 @@ Sms on Rails provides an interface and ORM framework for sending and storing SMS
 
 The models and underlying architecture extend and include a ton of modules
 and are designed to be configured if necessary. If you do not wish to run the
-vanilla configuration, copy the vendor/plugins/sms_on_rails/lib/models to your
-local models directory.
+vanilla configuration, copy the <tt>vendor/plugins/sms_on_rails/lib/models</tt> to your
+local models directory or copy <tt>vendor/plugins/sms_on_rails/lib/service_providers</tt> to <tt>lib/service_providers</tt>.
 
 A lot of care has gone into the locking mechanism to prevent double sends. This
 is a precursor to mass Smsing machine. Further detailed configuration is necessary. Contact
 blythe@snowgiraffe.com if you love grapes.
 
-
-
 == Install
-  script/plugin install git://github.com/blythedunham/smsonrails.git
 
-=== Quick Install
-  script/plugin install git://github.com/blythedunham/smsonrails.git
- 
+=== Install Gem
+<b>Add to environment.rb </b>
+  config.gem 'blythedunham-smsonrails', :lib => 'sms_on_rails', :source  => 'http://gems.github.com'
+  config.gem 'clickatell' #If using Clickatell
+
+Vendor the Gem
+  rake gems:install
+  rake gems:unpack
+
+=== Quick Setup (after Install)
+  
   script/generate sms_on_rails setup --default-service-provider=[provider]
 
-  rake gems:install (if using Clickatell)
+  rake gems:install or rake gems:unpack (if using Clickatell)
 
   rake db:migrate
+
+=== Alternate Install
+<b>Directly Install Gem</b>
+  gem sources -a http://gems.github.com
+  sudo gem install blythedunham-smsonrails
+
+<b>Plugin</b>
+  script/plugin install git://github.com/blythedunham/smsonrails.git
 
 Edit SMS configuration details in <tt>config/environment.rb</tt>. Sign up for clickatell at http://clickatell.com and/or update your mail settings for use with the email gateways.
 
