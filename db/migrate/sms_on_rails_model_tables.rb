@@ -31,9 +31,9 @@
       t.column :options, :string, :default => nil
       t.column :send_priority,  :integer, :limit => 4, :null => false, :default => 0
       t.column :actual_message, :string, :limit => 160, :null => true, :default => nil
+      t.column :unique_id, :string, :default => nil
     end
 
-    execute "ALTER TABLE sms_outbounds ADD COLUMN `unique_id` varchar(255) character set latin1 collate latin1_bin default NULL"
     add_index :sms_outbounds, :unique_id, :unique => 'true', :name => 'uk_sms_outbounds_unique_id'
     add_index :sms_outbounds, [:sms_draft_id, :sms_phone_number_id], :unique => 'true', :name => 'uk_sms_outbounds_draft_phone_number'
 
