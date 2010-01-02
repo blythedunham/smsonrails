@@ -1,7 +1,49 @@
+require 'rubygems'
 require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
-require 'echoe'
+
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |gem|
+    gem.name = "smsonrails"
+    gem.summary = %Q{Sms on Rails provides your app with instant SMS integration}
+    gem.description = %Q{Sms on Rails provides your app with instant SMS integration}
+    gem.email = "blythe@snowgiraffe.com"
+    gem.homepage = "http://github.com/blythedunham/smsonrails"
+    gem.authors = ["Blythe Dunham"]
+    gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
+    gem.add_development_dependency "clickatell", ">= 0"
+    gem.add_dependency 'activesupport', ">=2.0.0"
+    gem.add_dependency 'static_record_cache'
+    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
+  end
+  Jeweler::GemcutterTasks.new
+rescue LoadError
+  puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
+end
+
+require 'rake/testtask'
+Rake::TestTask.new(:test) do |test|
+  test.libs << 'lib' << 'test'
+  test.pattern = 'test/**/test_*.rb'
+  test.verbose = true
+end
+
+begin
+  require 'rcov/rcovtask'
+  Rcov::RcovTask.new do |test|
+    test.libs << 'test'
+    test.pattern = 'test/**/test_*.rb'
+    test.verbose = true
+  end
+rescue LoadError
+  task :rcov do
+    abort "RCov is not available. In order to run rcov, you must: sudo gem install spicycode-rcov"
+  end
+end
+
+task :test => :check_dependencies
 
 desc 'Default: run unit tests.'
 task :default => :test
@@ -60,15 +102,6 @@ task :create_templates do
     FileUtils.mkdir_p File.dirname("#{dest_dir}/#{f}")
     system("cp -r #{src_dir}/#{f} #{dest_dir}/#{f}")
   end
-end
-
-Echoe.new('sms_on_rails', '0.1.0') do |p|
-  p.description = "Integrate your application with SMS through Clickatell or the Email Gateways"
-  p.url = "http://github.com/blythedunham/smsonrails"
-  p.author = "Blythe Dunham"
-  p.email = "blythe@snowgiraffe.com"
-  p.ignore_pattern = ["tmp/*", "script/*"]
-  p.development_dependencies = []
 end
 
 Dir["#{File.dirname(__FILE__)}/tasks/*.rake"].sort.each { |ext| load ext }

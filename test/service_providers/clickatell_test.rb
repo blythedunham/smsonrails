@@ -1,6 +1,4 @@
 require File.dirname(__FILE__)+'/abstract_test_support.rb'
-require File.dirname(__FILE__)+'/test_password.rb'
-
 
 
 class SmsOnRails::ServiceProviders::ClickatellTest < Test::Unit::TestCase

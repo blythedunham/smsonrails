@@ -1,4 +1,5 @@
 require 'rubygems'
+gem 'activesupport', :version => ">= 2.0.0"
 require 'active_support'
 require 'active_support/test_case'
 require 'active_record'
