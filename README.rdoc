@@ -161,10 +161,10 @@ To send a message with validation use +send_to_phone_number+ with a string or  S
 
 === ORM examples:
 Clickatell does not need a carrier
-  SmsOnRails::Outbound.create_sms '12065551234', 'Send this test message', :send_immediately => true
+  SmsOnRails::Outbound.create_sms 'Send this test message', '11234567890', :send_immediately => true 
 
 Email gateway needs a carrier specified
-  sms = SmsOnRails::Outbound.create_sms '12065551234', 'Send this test message', :carrier => :att
+  sms = SmsOnRails::Outbound.create_sms 'Send this test message', '12065551234',  :carrier => :att
   sms.deliver!
 
 
